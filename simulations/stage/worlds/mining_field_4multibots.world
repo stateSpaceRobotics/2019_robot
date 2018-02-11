@@ -10,7 +10,7 @@ define block model
 
 window
 (
-  size [ 400.000 800.000 ]
+  size [ 400.000 820.000 ]
   center [1.89 3.69]
   scale 100.0
 )
@@ -63,7 +63,7 @@ define sick ranger
 
 define minibot position
 (
-  localisation "odom"
+  #localization "odom"
   localization_origin [0 0 0 0]
   odom_error [0 0 0 0 0 0]
   size [0.2 0.2 0.45]

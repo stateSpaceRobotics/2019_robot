@@ -9,9 +9,9 @@ define block model
 )
 
 window
-( 
-  size [ 400.000 800.000 ] 
-  scale 100.0 
+(
+  size [ 400.000 820.000 ] 
+  scale 100.0
 )
 
 define map model
