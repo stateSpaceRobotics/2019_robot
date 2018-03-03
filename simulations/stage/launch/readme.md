@@ -15,7 +15,7 @@ These are the launch files for the stage simulation
 * field_empty.launch
 	* launches a Stage simulation of the field with no robots and no obstacles
 
-* field_obstables.launch
+* field_obstacles.launch
 	* launches a Stage simulation of the field with no robots and few obstacles
 
 * field_robots_start.launch
@@ -25,5 +25,15 @@ These are the launch files for the stage simulation
 
 * field_robots_deployed.launch
 	* launches a Stage simulation of the field with robots and no obstacles. Robots are in deployed configuration(sensor tower and digger position)
+	* If cannot launch, use "chmod +x" command on magic_odom.py
+	* control by rostopic
+
+* field_robots_start_obstacles.launch
+	* launches a Stage simulation of the field with robots and obstacles. Robots are in starting configuration(clustered together)
+	* If cannot launch, use "chmod +x" command on magic_odom.py
+	* control by rostopic
+
+* field_robots_deployed_obstacles.launch
+	* launches a Stage simulation of the field with robots and obstacles. Robots are in deployed configuration(sensor tower and digger position)
 	* If cannot launch, use "chmod +x" command on magic_odom.py
 	* control by rostopic
