@@ -1,0 +1,52 @@
+<launch>
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find stage)/worlds/multi_bot_obstacles.world" respawn="false" output="screen" >
+        <remap from="/robot_0/odom" to="/robot_red/odom" />
+        <remap from="/robot_0/cmd_vel" to="/robot_red/cmd_vel" />
+        <remap from="/robot_0/base_pose_ground_truth" to="/robot_red/base_pose_ground_truth" />
+        <remap from="/robot_1/odom" to="/sensor_tower/odom" />
+        <remap from="/robot_1/cmd_vel" to="/sensor_tower/cmd_vel" />
+        <remap from="/robot_1/base_pose_ground_truth" to="/sensor_tower/base_pose_ground_truth" />
+        <remap from="/robot_2/odom" to="/digger/odom" />
+        <remap from="/robot_2/cmd_vel" to="/digger/cmd_vel" />
+        <remap from="/robot_2/base_pose_ground_truth" to="/digger/base_pose_ground_truth" />
+        <remap from="/robot_3/odom" to="/robot_yellow/odom" />
+        <remap from="/robot_3/cmd_vel" to="/robot_yellow/cmd_vel" />
+        <remap from="/robot_3/base_pose_ground_truth" to="/robot_yellow/base_pose_ground_truth" />
+    </node>
+
+    <node pkg="stage" type="magic_odom.py" name="magic_odom">
+      <remap from="/robot_0/odom" to="/robot_red/odom" />
+      <remap from="/robot_0/miniBot_poses" to="/robot_red/miniBot_poses" />
+      <remap from="/robot_1/odom" to="/sensor_tower/odom" />
+      <remap from="/robot_1/miniBot_poses" to="/sensor_tower/miniBot_poses" />
+      <remap from="/robot_2/odom" to="/digger/odom" />
+      <remap from="/robot_2/miniBot_poses" to="/digger/miniBot_poses" />
+      <remap from="/robot_3/odom" to="/robot_yellow/odom" />
+      <remap from="/robot_3/miniBot_poses" to="/robot_yellow/miniBot_poses" />
+    </node>
+
+    <group ns="/robot_0">
+        <remap from="/cmd_vel" to="/robot_0/cmd_vel" />
+        <remap from="/odom" to="/robot_0/odom" />
+        <remap from="/miniBot_poses" to="/robot_0/miniBot_poses" />
+    </group>
+
+    <group ns="/robot_1">
+        <remap from="/cmd_vel" to="/robot_1/cmd_vel" />
+        <remap from="/odom" to="/robot_1/odom" />
+        <remap from="/miniBot_poses" to="/robot_1/miniBot_poses" />
+    </group>
+
+    <group ns="/robot_2">
+        <remap from="/cmd_vel" to="/robot_2/cmd_vel" />
+        <remap from="/odom" to="/robot_2/odom" />
+        <remap from="/miniBot_poses" to="/robot_2/miniBot_poses" />
+    </group>
+
+    <group ns="/robot_3">
+        <remap from="/cmd_vel" to="/robot_3/cmd_vel" />
+        <remap from="/odom" to="/robot_3/odom" />
+        <remap from="/miniBot_poses" to="/robot_3/miniBot_poses" />
+    </group>
+
+</launch>

@@ -1,0 +1,19 @@
+<launch>
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find stage)/worlds/single_bot_obstacles.world" respawn="false" output="screen" >
+        <remap from="/robot_0/odom" to="/robot_red/odom" />
+        <remap from="/robot_0/cmd_vel" to="/robot_red/cmd_vel" />
+        <remap from="/robot_0/base_pose_ground_truth" to="/robot_red/base_pose_ground_truth" />
+    </node>
+
+    <node pkg="stage" type="magic_odom_single_bot.py" name="magic_odom">
+        <remap from="/robot_0/odom" to="/robot_red/odom" />
+        <remap from="/robot_0/miniBot_poses" to="/robot_red/miniBot_poses" />
+    </node>
+
+    <group ns="/robot_0">
+        <remap from="/cmd_vel" to="/robot_0/cmd_vel" />
+        <remap from="/odom" to="/robot_0/odom" />
+        <remap from="/miniBot_poses" to="/robot_0/miniBot_poses" />
+    </group>
+
+</launch>
