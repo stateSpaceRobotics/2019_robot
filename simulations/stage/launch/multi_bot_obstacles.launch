@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find stage)/worlds/multi_bot_obstacles.world" respawn="false" output="screen" >
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find ssr_stage)/worlds/multi_bot_obstacles.world" respawn="false" output="screen" >
         <remap from="/robot_0/odom" to="/robot_red/odom" />
         <remap from="/robot_0/cmd_vel" to="/robot_red/cmd_vel" />
         <remap from="/robot_0/base_pose_ground_truth" to="/robot_red/base_pose_ground_truth" />
@@ -14,7 +14,7 @@
         <remap from="/robot_3/base_pose_ground_truth" to="/robot_yellow/base_pose_ground_truth" />
     </node>
 
-    <node pkg="stage" type="magic_odom.py" name="magic_odom">
+    <node pkg="ssr_stage" type="magic_odom.py" name="magic_odom">
       <remap from="/robot_0/odom" to="/robot_red/odom" />
       <remap from="/robot_0/miniBot_poses" to="/robot_red/miniBot_poses" />
       <remap from="/robot_1/odom" to="/sensor_tower/odom" />
