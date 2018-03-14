@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="stage" type="control_multi_bot.py" name="control" output="screen" required="true">
+    </node>
+</launch>
