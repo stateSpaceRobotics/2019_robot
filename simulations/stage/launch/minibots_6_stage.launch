@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find stage)/worlds/mining_field_6multibots.world" respawn="false" output="screen" >
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find ssr_stage)/worlds/mining_field_6multibots.world" respawn="false" output="screen" >
         <!--<remap from="/cmd_vel" to="/robot_0/cmd_vel"/>
         <remap from="/odom" to="/robot_0/odom"/>-->
     </node>
