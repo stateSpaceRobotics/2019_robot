@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="stage" type="control_single_bot.py" name="control" output="screen" required="true">
+    <node pkg="ssr_stage" type="control_single_bot.py" name="control" output="screen" required="true">
     </node>
 </launch>

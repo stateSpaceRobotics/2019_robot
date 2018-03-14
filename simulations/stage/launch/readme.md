@@ -60,4 +60,4 @@ These are the launch files for the stage simulation
 	* To initialize:
 		* Open a new terminal
 		* catkin_make the package
-		* roslaunch stage control_multi_bot.launch (or control_single_bot.launch)
+		* roslaunch ssr_stage control_multi_bot.launch (or control_single_bot.launch)
