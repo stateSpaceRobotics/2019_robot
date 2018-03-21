@@ -5,7 +5,7 @@
         <remap from="/robot_0/base_pose_ground_truth" to="/robot_red/base_pose_ground_truth" />
     </node>
 
-    <node pkg="stage" type="magic_odom_single_bot.py" name="magic_odom">
+    <node pkg="ssr_stage" type="magic_odom_single_bot.py" name="magic_odom">
         <remap from="/robot_0/odom" to="/robot_red/odom" />
         <remap from="/robot_0/miniBot_poses" to="/robot_red/miniBot_poses" />
     </node>

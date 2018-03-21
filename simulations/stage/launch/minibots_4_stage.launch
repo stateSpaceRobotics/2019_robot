@@ -4,7 +4,7 @@
         <remap from="/odom" to="/robot_0/odom"/>-->
     </node>
 
-    <node pkg="stage" type="magic_odomFromStage_4.py" name="magic_odomFromStage_4">
+    <node pkg="ssr_stage" type="magic_odomFromStage_4.py" name="magic_odomFromStage_4">
     </node>
 
     <group ns="/robot_0">
