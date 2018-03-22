@@ -12,7 +12,7 @@
         <remap from="/odom" to="/robot_0/odom" />
         <remap from="/miniBot_poses" to="/robot_0/miniBot_poses" />
 
-        <node name = "minibot_navigator" pkg="stage" type="minibot_navigator.py">
+        <node name = "minibot_navigator" pkg="ssr_stage" type="minibot_navigator.py">
         </node>
     </group>
 
@@ -21,7 +21,7 @@
         <remap from="/odom" to="/robot_1/odom" />
         <remap from="/miniBot_poses" to="/robot_1/miniBot_poses" />
 
-        <node name = "minibot_navigator" pkg="stage" type="minibot_navigator.py">
+        <node name = "minibot_navigator" pkg="ssr_stage" type="minibot_navigator.py">
         </node>
     </group>
 
@@ -30,7 +30,7 @@
         <remap from="/odom" to="/robot_2/odom" />
         <remap from="/miniBot_poses" to="/robot_2/miniBot_poses" />
 
-        <node name = "minibot_navigator" pkg="stage" type="minibot_navigator.py">
+        <node name = "minibot_navigator" pkg="ssr_stage" type="minibot_navigator.py">
         </node>
     </group>
 
@@ -39,7 +39,7 @@
         <remap from="/odom" to="/robot_3/odom" />
         <remap from="/miniBot_poses" to="/robot_3/miniBot_poses" />
 
-        <node name = "minibot_navigator" pkg="stage" type="minibot_navigator.py">
+        <node name = "minibot_navigator" pkg="ssr_stage" type="minibot_navigator.py">
         </node>
     </group>
 
