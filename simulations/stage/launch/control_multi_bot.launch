@@ -1,4 +1,0 @@
-<launch>
-    <node pkg="ssr_stage" type="control_multi_bot.py" name="control" output="screen" required="true">
-    </node>
-</launch>

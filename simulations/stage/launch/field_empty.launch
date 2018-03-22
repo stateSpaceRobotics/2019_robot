@@ -1,3 +1,7 @@
 <launch>
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find ssr_stage)/worlds/field_empty.world" respawn="false" output="screen" />
+
+    <include file="$(find ssr_stage)/launch/stage_remapped.launch" >
+        <arg name="world" value="field_empty.world"/>
+    </include>
+
 </launch>
