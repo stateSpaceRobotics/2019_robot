@@ -1,0 +1,3 @@
+[submodule "multi_robot_path_planner"]
+	path = multi_robot_path_planner
+	url = https://github.com/stateSpaceRobotics/multi_robot_path_planner
