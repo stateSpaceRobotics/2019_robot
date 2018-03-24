@@ -112,23 +112,23 @@ class Drive(smach.State):
 
 
 
-def minibot_main():
+def main():
     rospy.init_node('smach_example_state_machine')
 
     # Create a SMACH state machine
-    sm_minibot = smach.StateMachine(outcomes=['end'])
-    sm_minibot.userdata.sm_counter = 0
-    sm_minibot.userdata.e_stop = False
+    sm = smach.StateMachine(outcomes=['outcome6'])
+    sm.userdata.sm_counter = 0
+    sm.userdata.e_stop = False
 
     # Open the container
-    with sm_minibot:
+    with sm:
         # Add states to the container
 
 #STATE IDLE
 
         smach.StateMachine.add('Idle', Idle(), 
                                transitions={'outcome1':'Drive', 
-                                            'outcome2':'end',
+                                            'outcome2':'outcome6',
                                             'kill':'Kill'},
                                remapping={'Idle_counter_in':'sm_counter',
                                           'e_stop':'e_stop', 
@@ -171,7 +171,7 @@ def minibot_main():
 
 #STATE KILL
 
-        smach.StateMachine.add('Kill', Kill(), transitions={'Kill':'end'})
+        smach.StateMachine.add('Kill', Kill(), transitions={'Kill':'outcome6'})
 
 #STATE STUCK
 
@@ -181,21 +181,20 @@ def minibot_main():
                                                            'e_stop':'e_stop',
                                                            'counter_out':'sm_counter'})
 
-    return sm_minibot
 
     # Execute SMACH plan
     # First you create a state machine sm
     # .....
     # Creating of state machine sm finished
     # Create and start the introspection server
-    #sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
-    #sis.start()
+    sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
+    sis.start()
 
     # Execute the state machine
-    #outcome = sm_minibot.execute()
+    outcome = sm.execute()
     # Wait for ctrl-c to stop the application
-    #rospy.spin()
-    #sis.stop()
+    rospy.spin()
+    sis.stop()
 
 
 
