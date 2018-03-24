@@ -10,6 +10,8 @@ include "obstacle.inc"
 
 # Include robot models
 include "transporter.inc"
+include "dumper.inc"
+include "digger.inc"
 
 # Load obstacles here
 # Example:

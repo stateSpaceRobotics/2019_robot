@@ -1,5 +1,5 @@
-# Create the transporter robot model
-define transporter position
+# Create the digger robot model
+define digger position
 (
   #localization "odom"
   localization_origin [0 0 0 0]

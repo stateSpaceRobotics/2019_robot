@@ -10,9 +10,11 @@ include "obstacle.inc"
 
 # Include robot models
 include "transporter.inc"
+include "dumper.inc"
+include "digger.inc"
 
-# Instantiate a  transporter robot
-transporter( pose [1 1 0 0] color "red")
+# Instantiate a dumper robot
+dumper( pose [1 1 0 0] color "red")
 
 # Load obstacles here
 # Example:
