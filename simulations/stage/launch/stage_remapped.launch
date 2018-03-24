@@ -4,9 +4,9 @@
 
     <node pkg="stage_ros" type="stageros" name="stageros" args="$(find ssr_stage)/worlds/$(arg world)" respawn="false" output="screen" >
         <!-- Situation with only one robot -->
-        <remap from="cmd_vel" to="transporter/cmd_vel" />
-        <remap from="odom" to="transporter/odom" />
-        <remap from="base_pose_ground_truth" to="transporter/base_pose_ground_truth" />
+        <remap from="cmd_vel" to="dumper/cmd_vel" />
+        <remap from="odom" to="dumper/odom" />
+        <remap from="base_pose_ground_truth" to="dumper/base_pose_ground_truth" />
 
         <!-- Simulation with a team of robots -->
         <remap from="robot_0/cmd_vel" to="transporter/cmd_vel" />
