@@ -40,12 +40,11 @@ class Dig_Prep(smach.State):
 #
 class Dig(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['Full_Bucket','kill'],input_keys=['e_stop'])
+        smach.State.__init__(self, outcomes=['kill'],input_keys=['e_stop'])
     def execute(self, userdata):
         if userdata.e_stop==True:
             return 'kill'
         rospy.loginfo('Executing state Dig')
-        return 'Full_Bucket'
 
 # define state Load_Prep
 class Load_Prep(smach.State):
@@ -106,16 +105,16 @@ class Kill(smach.State):
 
 
 
-def main():
+def diggerbot_main():
     rospy.init_node('smach_example_state_machine')
 
     # Create a SMACH state machine
-    sm = smach.StateMachine(outcomes=['outcome4'])
-    sm.userdata.sm_counter = 0
-    sm.userdata.e_stop = False
+    sm_diggerbot = smach.StateMachine(outcomes=['end'])
+    sm_diggerbot.userdata.sm_counter = 0
+    sm_diggerbot.userdata.e_stop = False
 
     # Open the container
-    with sm:
+    with sm_diggerbot:
         # Add states to the container
 
 #STATE IDLE
@@ -123,42 +122,78 @@ def main():
         smach.StateMachine.add('Idle', Idle(), 
                                transitions={'outcome1':'Drive', 
                                             'kill':'Kill',
-                                            'outcome2':'outcome4'},
+                                            'outcome2':'end'},
                                remapping={'Idle_counter_in':'sm_counter',
                                           'e_stop':'e_stop', 
                                           'Idle_counter_out':'sm_counter'})
 
 #STATE DRIVE
 
-        smach.StateMachine.add('Drive',Drive(),transitions={'outcome1':'Dig_Prep',
+        smach.StateMachine.add('Drive',Drive(),transitions={'outcome1':'CON',
                                                             'kill':'Kill',
                                                             'stuck':'Stuck'},
                                                remapping={'Drive_counter_in':'sm_counter',
                                                           'e_stop':'e_stop'})
+#STATE MACHINE LOADING
+        sm_loader=smach.StateMachine(outcomes=['end loading'])
+        sm_loader.userdata.e_stop=sm_diggerbot.userdata.e_stop
+        sm_loader.userdata.sm_counter=sm_diggerbot.userdata.sm_counter
 
-#STATE DIG_Prep
+#STATE MACHINE DIGGINER
+        sm_digger=smach.StateMachine(outcomes=['end digging'])
+        sm_digger.userdata.e_stop=sm_diggerbot.userdata.e_stop
+        sm_digger.userdata.sm_counter=sm_diggerbot.userdata.sm_counter
 
-        smach.StateMachine.add('Dig_Prep',Dig_Prep(),transitions={'Success':'Dig',
-                                                                  'kill':'Kill'},
-                                                     remapping={'e_stop':'e_stop'})
+#STATES IN LOADING
+        with sm_loader:
+
+#STATE LOAD PREP
+            smach.StateMachine.add('Load_Prep',Load_Prep(),
+                                   transitions={'kill':'end loading',
+                                                'Minibot_in_place':'Load'},
+                                   remapping={'e_stop':'e_stop'})
+
+#STATE LOAD            
+            smach.StateMachine.add('Load',Load(),
+                                   transitions={'kill':'end loading',
+                                                'Load_Successful':'Load_Prep'},
+                                   remapping={'e_stop':'e_stop'})
+
+#STATE IN DIGGING
+        with sm_digger:
+
+#STATE DIG PREP
+            smach.StateMachine.add('Dig_Prep',Dig_Prep(),
+                                   transitions={'kill':'end digging',
+                                                'Success':'Dig'},
+                                   remapping={'e_stop':'e_stop'})
 
 #STATE DIG
+            smach.StateMachine.add('Dig',Dig(),
+                                   transitions={'kill':'end digging'},
+                                   remapping={'e_stop':'e_stop'})
 
-        smach.StateMachine.add('Dig', Dig(),transitions={'Full_Bucket':'Load_Prep',
-                                                         'kill':'Kill'},
-                                            remapping={'e_stop':'e_stop'})
+#STATE MACHINE CONCURRENCE
+        sm_con=smach.Concurrence(outcomes=['loop','end'],
+                                 default_outcome='loop',
+                                 outcome_map={'end':
+                                              {'sm_digger':'end digging',
+                                               'sm_loader':'end loading'}})
 
-#STATE LOAD_PREP
+#STATES IN CONCURRENCE
+        with sm_con:
 
-        smach.StateMachine.add('Load_Prep', Load_Prep(), transitions={'Minibot_in_place':'Load',
-                                                                      'kill':'Kill'},
-                                                         remapping={'e_stop':'e_stop'})
+#STATE SM_DIGGER
+            smach.Concurrence.add('sm_digger',sm_digger)
 
-#STATE LOAD
+#STATE SM_LOADER
+            smach.Concurrence.add('sm_loader',sm_loader)
 
-        smach.StateMachine.add('Load', Load(), transitions={'Load_Successful':'Dig_Prep',
-                                                            'kill':'Kill'},
-                                               remapping={'e_stop':'e_stop'})
+#STATE CONCURRENCE 
+        smach.StateMachine.add('CON',sm_con,
+                               transitions={'end':'Kill',
+                                            'loop':'CON'},
+                               remapping={'e_stop':'e_stop'})
 
 #STATE STUCK
 
@@ -168,8 +203,9 @@ def main():
 
 #STATE KILL
 
-        smach.StateMachine.add('Kill',Kill(), transitions={'Kill':'outcome4'})
+        smach.StateMachine.add('Kill',Kill(), transitions={'Kill':'end'})
 
+    return sm_diggerbot
 
     # Execute SMACH plan
     # Execute SMACH plan
@@ -177,14 +213,14 @@ def main():
     # .....
     # Creating of state machine sm finished
     # Create and start the introspection server
-    sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
-    sis.start()
+    #sis = smach_ros.IntrospectionServer('server_name', sm_diggerbot, '/SM_ROOT')
+    #sis.start()
 
     # Execute the state machine
-    outcome = sm.execute()
+    #outcome = sm_diggerbot.execute()
     # Wait for ctrl-c to stop the application
-    rospy.spin()
-    sis.stop()
+    #rospy.spin()
+    #sis.stop()
 
 if __name__ == '__main__':
-    main()
+    diggerbot_main()
