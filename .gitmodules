@@ -1,3 +1,6 @@
 [submodule "multi_robot_path_planner"]
 	path = multi_robot_path_planner
 	url = https://github.com/stateSpaceRobotics/multi_robot_path_planner
+[submodule "sensing/pointcloud_obstacle_processing"]
+	path = sensing/pointcloud_obstacle_processing
+	url = https://github.com/stateSpaceRobotics/pointcloud_obstacle_processing
