@@ -4,3 +4,6 @@
 [submodule "sensing/pointcloud_obstacle_processing"]
 	path = sensing/pointcloud_obstacle_processing
 	url = https://github.com/stateSpaceRobotics/pointcloud_obstacle_processing
+[submodule "sensing/aruco_ros"]
+	path = sensing/aruco_ros
+	url = https://github.com/stateSpaceRobotics/aruco_ros.git
