@@ -14,9 +14,9 @@ include "dumper.inc"
 include "digger.inc"
 
 # Instantiate a team of robots
-transporter( pose [3.5 3.5 0 0] color "red") #Transporter
-dumper( pose [1.89 0.3 0 0] color "green") #Dumper
-digger( pose [1.89 6.3 0 0] color "blue") #Digger
+transporter( pose [3.5 3.5 0 0] name "transporter" color "red") #Transporter
+dumper( pose [1.89 0.3 0 0] name "dumper" color "green") #Dumper
+digger( pose [1.89 6.3 0 0] name "digger" color "blue") #Digger
 
 # Load obstacles here
 # Example:
