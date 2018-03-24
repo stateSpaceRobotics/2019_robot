@@ -2,89 +2,29 @@ resolution 0.02 # set the resolution of the underlying raytrace model in meters
 interval_sim 100 # simulation timestep in milliseconds
 #interval_real 100
 
-define block model
-(
-  size [0.1 0.1 0.7]
-  gui_nose 0
-)
+# Include map (defines and loads mining map)
+include "map.inc"
 
-window
-(
-  size [ 400.000 820.000 ]
-  center [1.89 3.69]
-  scale 100.0
-)
+# Include obstacle models
+include "obstacle.inc"
 
-define map model
-(
-  color "gray30"
-  boundary 0
-  gui_nose 0
-  gui_grid 0
-  gui_move 0
-  gui_outline 0
-  obstacle_return 1
-  gripper_return 0
-  fiducial_return 0
-# laser_return 1
-)
+# Include robot models
+include "transporter.inc"
 
-map
-(
-  name "mining_field"
-  size [3.78 7.38 0.5]
-  pose [1.89 3.69 0 0]
-  bitmap "mining_field.png"
-)
+# Instantiate a  transporter robot
+transporter( pose [3.5 3.5 0 0] color "red") #Transporter
+transporter( pose [1.89 0.3 0 0] color "green") #Dumper
+transporter( pose [1.89 6.3 0 0] color "blue") #Digger
 
-define hokuyo ranger
-(
-  sensor(
-    range [0 15.0]
-    fov 180.0
-    samples 400
-  )
-  color "black"
-  size [ 0.05 0.05 0.1 ]
-  #ctrl "lasernoise"
-)
-
-define sick ranger
-(
-  sensor(
-    range [0 4.0]
-    fov 90
-    samples 200
-  )
-  color "black"
-  size [ 0.05 0.05 0.1 ]
-  #ctrl "lasernoise"
-)
-
-define minibot position
-(
-  #localization "odom"
-  localization_origin [0 0 0 0]
-  odom_error [0 0 0 0 0 0]
-  size [0.2 0.2 0.45]
-  origin [0 0 0 0]
-  gui_nose 1
-  drive "diff"
-  #hokuyo(pose [ 0.0 0.000 0.1 180 ])
-  #sick(pose [ 0.0 0.100 0.0 0])
-  bitmap "robot.png"
-)
-
-minibot( pose [1 1 0 0] color "red")
-minibot( pose [1.89 0.2 0 0] color "green") #Green for Sensor Tower
-minibot( pose [1.89 5.5 0 0] color "blue") #Blue for Digging Bot
-minibot( pose [1.3 1.3 0 0] color "yellow")
-block( pose [1.5852 0 0 0] color "green")
-block( pose [2.1948 0 0 0] color "blue")
-#Change x-coordinate and y-coordinate to move the block
-block( pose [1 5 0 0] color "black")
-block( pose [2 4 0 0] color "black")
-block( pose [3 3 0 0] color "black")
-block( pose [1 3 0 0] color "black")
-block( pose [2 6 0 0] color "black")
-block( pose [3 6 0 0] color "black")
+# Load obstacles here
+# Example:
+obstacle( pose [1.89 6.5 0 0] color "black")
+obstacle( pose [1.18 6.5 0 0] color "black")
+obstacle( pose [2.6 6.5 0 0] color "black")
+obstacle( pose [2.19 5.5 0 0] color "black")
+obstacle( pose [1.59 5.5 0 0] color "black")
+obstacle( pose [3.09 5.5 0 0] color "black")
+obstacle( pose [0.69 5.5 0 0] color "black")
+obstacle( pose [1.89 4.5 0 0] color "black")
+obstacle( pose [1.18 4.5 0 0] color "black")
+obstacle( pose [2.6 4.5 0 0] color "black")
