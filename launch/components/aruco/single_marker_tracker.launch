@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <arg name="node_name" default="aruco_single" />
+  <arg name="image_rect_topic" default="image_rect_color" />
+  <arg name="camera_info_topic" default="camera_info" />
+
+  <node pkg="aruco_ros" type="single" name="$(arg node_name)">
+      <remap from="/camera_info" to="$(arg camera_info_topic)" />
+      <remap from="/image" to="$(arg image_rect_topic)" />
+  </node>
+</launch>

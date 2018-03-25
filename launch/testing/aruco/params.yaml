@@ -1,0 +1,33 @@
+elp_test:
+  elp_test_camera:
+    frame_id: elp_camera
+    camera_info_url: file:///home/ssr/ros_kinetic/rmc_dev_ws/src/2018_robot/launch/testing/aruco/ost.yaml
+    width: 640
+    height: 480
+    video_mode: "yuyv"
+    frame_rate: 30
+    vendor: 0x05a3
+    product: 0x9310
+    serial: ""
+    index: 0
+    timestamp_method: start
+    auto_exposure: 3
+    auto_white_balance: False
+
+  aruco_node_415:
+    marker_size:     0.3667125
+    marker_id:       415
+    camera_frame:    elp_camera
+    marker_frame:    415_test_marker
+    reference_frame: ""
+    corner_refinement: LINES
+    image_is_rectified: True
+
+  aruco_node_909:
+    marker_size:     0.0492125
+    marker_id:       909
+    camera_frame:    elp_camera
+    marker_frame:    909_test_marker
+    reference_frame: ""
+    corner_refinement: LINES
+    image_is_rectified: True
