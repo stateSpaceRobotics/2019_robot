@@ -7,19 +7,21 @@
         <remap from="cmd_vel" to="dumper/cmd_vel" />
         <remap from="odom" to="dumper/odom" />
         <remap from="base_pose_ground_truth" to="dumper/base_pose_ground_truth" />
+        <remap from="base_scan" to="dumper/base_scan" />
 
         <!-- Simulation with a team of robots -->
-        <remap from="robot_0/cmd_vel" to="transporter/cmd_vel" />
-        <remap from="robot_0/odom" to="transporter/odom" />
-        <remap from="robot_0/base_pose_ground_truth" to="transporter/base_pose_ground_truth" />
+        <remap from="robot_0/cmd_vel" to="dumper/cmd_vel" />
+        <remap from="robot_0/odom" to="dumper/odom" />
+        <remap from="robot_0/base_pose_ground_truth" to="dumper/base_pose_ground_truth" />
+        <remap from="robot_0/base_scan" to="dumper/base_scan" />
 
-        <remap from="robot_1/cmd_vel" to="dumper/cmd_vel" />
-        <remap from="robot_1/odom" to="dumper/odom" />
-        <remap from="robot_1/base_pose_ground_truth" to="dumper/base_pose_ground_truth" />
+        <remap from="robot_1/cmd_vel" to="digger/cmd_vel" />
+        <remap from="robot_1/odom" to="digger/odom" />
+        <remap from="robot_1/base_pose_ground_truth" to="digger/base_pose_ground_truth" />
 
-        <remap from="robot_2/cmd_vel" to="digger/cmd_vel" />
-        <remap from="robot_2/odom" to="digger/odom" />
-        <remap from="robot_2/base_pose_ground_truth" to="digger/base_pose_ground_truth" />
+        <remap from="robot_2/cmd_vel" to="transporter/cmd_vel" />
+        <remap from="robot_2/odom" to="transporter/odom" />
+        <remap from="robot_2/base_pose_ground_truth" to="transporter/base_pose_ground_truth" />
     </node>
 
 </launch>
