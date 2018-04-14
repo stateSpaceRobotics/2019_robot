@@ -1,0 +1,7 @@
+<launch>
+
+    <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch" />
+
+    <node pkg="autonomy_controller" type="SensorTower_State_Machine.py" name="state_machine" />
+
+</launch>
