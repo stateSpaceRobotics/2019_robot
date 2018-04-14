@@ -14,6 +14,9 @@ from move_base_msgs.msg import *
 
 class Idle(smach.State):
     def __init__(self):
+        self.digger_in_pos = False
+        sub = rospy.Subscriber(
+            '/smach_flags/digger_in_pos', Bool, self.callback)
         smach.State.__init__(self,
                              outcomes=['outcome1', 'outcome2', 'kill'],
                              input_keys=['Idle_counter_in', 'e_stop'],
@@ -21,10 +24,16 @@ class Idle(smach.State):
 
     def execute(self, userdata):
         #rospy.loginfo('Executing state Idle')
-        rospy.sleep(30)
         if userdata.e_stop == True:
             return 'kill'
-        return 'outcome1'
+        if self.dumper_in_pos == True:
+            rospy.loginfo('[Minibot]: Digger_in_pos was True')
+            return 'outcome1'
+        else:
+            rospy.sleep(2)
+            return 'outcome2'
+    def callback(self, data):
+        self.digger_in_pos = data.data
 
 # define state Wait_to_Load
 
@@ -140,7 +149,7 @@ def minibot_main():
 
         smach.StateMachine.add('Idle', Idle(),
                                transitions={'outcome1': 'Drive_to_digger',
-                                            'outcome2': 'end',
+                                            'outcome2': 'Idle',
                                             'kill': 'Kill'},
                                remapping={'Idle_counter_in': 'sm_counter',
                                           'e_stop': 'e_stop',
