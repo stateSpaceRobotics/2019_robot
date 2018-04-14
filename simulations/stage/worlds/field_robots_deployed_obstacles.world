@@ -20,13 +20,7 @@ transporter( pose [3.5 3.5 0 0] name "transporter" color "red")
 
 # Load obstacles here
 # Example:
-obstacle( pose [1.89 6.5 0 0] color "black")
-obstacle( pose [1.18 6.5 0 0] color "black")
-obstacle( pose [2.6 6.5 0 0] color "black")
-obstacle( pose [2.19 5.5 0 0] color "black")
-obstacle( pose [1.59 5.5 0 0] color "black")
-obstacle( pose [3.09 5.5 0 0] color "black")
-obstacle( pose [0.69 5.5 0 0] color "black")
-obstacle( pose [1.89 4.5 0 0] color "black")
-obstacle( pose [1.18 4.5 0 0] color "black")
-obstacle( pose [2.6 4.5 0 0] color "black")
+obstacle( pose [0.51 4.27 0 0] color "black")
+obstacle( pose [1.09 3.27 0 0] color "black")
+obstacle( pose [1.89 4.21 0 0] color "black")
+obstacle( pose [2.89 3.66 0 0] color "black")
