@@ -1,0 +1,7 @@
+<launch>
+
+    <include file="$(find ssr_stage)/launch/stage_remapped.launch" >
+        <arg name="world" value="field_robots_deployed_obstacles.world"/>
+    </include>
+
+</launch>
