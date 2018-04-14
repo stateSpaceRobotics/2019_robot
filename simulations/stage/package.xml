@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>stage</name>
+  <name>ssr_stage</name>
   <version>0.0.0</version>
   <description>The stage package</description>
 
