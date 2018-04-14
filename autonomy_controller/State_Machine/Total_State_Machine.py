@@ -5,6 +5,8 @@ import roslib
 import rospy
 import smach
 import smach_ros
+import actionlib
+from move_base_msgs.msg import *
 import SensorTower_State_Machine
 import Minibot_State_Machine
 import Diggerbot_State_Machine
@@ -20,6 +22,19 @@ class Startup(smach.State):
 
     def execute(self, userdata):
         #rospy.loginfo('Executing state Idle')
+        dumper = actionlib.SimpleActionClient(
+            '/dumper/move_base', MoveBaseAction)
+
+        digger = actionlib.SimpleActionClient(
+            '/digger/move_base', MoveBaseAction)
+
+        transporter = actionlib.SimpleActionClient(
+            '/transporter/move_base', MoveBaseAction)
+
+        dumper.wait_for_server()
+        digger.wait_for_server()
+        transporter.wait_for_server()
+
         if userdata.e_stop == True:
             return 'kill'
         return 'begin'
@@ -27,7 +42,6 @@ class Startup(smach.State):
 
 def main():
     rospy.init_node('smach_example_state_machine')
-    global sm
     # Create a SMACH state machine
     sm = smach.StateMachine(outcomes=['outcome4'])
     sm.userdata.sm_counter = 0

@@ -47,6 +47,7 @@ class Dig_Prep(smach.State):
             self, outcomes=['Success', 'kill'], input_keys=['e_stop'])
 
     def execute(self, userdata):
+        rospy.sleep(60)
         if userdata.e_stop == True:
             return 'kill'
         # rospy.loginfo('Executing state Dig_Prep')
@@ -76,6 +77,7 @@ class Load_Prep(smach.State):
             self, outcomes=['Minibot_in_place', 'kill'], input_keys=['e_stop'])
 
     def execute(self, userdata):
+        rospy.sleep(60)
         if userdata.e_stop == True:
             return 'kill'
         # rospy.loginfo('Executing Load Prep')
@@ -171,7 +173,7 @@ def diggerbot_main():
 #                               remapping={'Drive_counter_in': 'sm_counter',
 #                                          'e_stop': 'e_stop'})
 
-        def drive_cb(userdata, goal):
+        def drive_goal_cb(userdata, goal):
             drive_goal = MoveBaseGoal()
             drive_goal.target_pose.header.frame_id = "/map"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
@@ -182,10 +184,17 @@ def diggerbot_main():
 
             return drive_goal
 
+        def drive_result_cb(userdata, status, result):
+            rospy.loginfo('[DIGGER]: status is %s', status)
+            pub = rospy.Publisher(
+                '/smach_flags/digger_in_pos', Bool, queue_size=1, latch=True)
+            pub.publish(True)
+
         smach.StateMachine.add('Drive',
                                smach_ros.SimpleActionState('/digger/move_base',
                                                            MoveBaseAction,
-                                                           goal_cb=drive_cb,
+                                                           goal_cb=drive_goal_cb,
+                                                           result_cb=drive_result_cb,
                                                            input_keys=[
                                                                'goal_pose']),
                                transitions={'succeeded': 'CON',

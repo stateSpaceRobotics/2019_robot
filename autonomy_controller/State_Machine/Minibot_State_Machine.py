@@ -6,6 +6,7 @@ import roslib
 import rospy
 import smach
 import smach_ros
+from std_msgs.msg import Bool
 from move_base_msgs.msg import *
 
 # define state Idle
@@ -26,12 +27,13 @@ class Idle(smach.State):
         #rospy.loginfo('Executing state Idle')
         if userdata.e_stop == True:
             return 'kill'
-        if self.dumper_in_pos == True:
+        if self.digger_in_pos == True:
             rospy.loginfo('[Minibot]: Digger_in_pos was True')
             return 'outcome1'
         else:
             rospy.sleep(2)
             return 'outcome2'
+
     def callback(self, data):
         self.digger_in_pos = data.data
 
