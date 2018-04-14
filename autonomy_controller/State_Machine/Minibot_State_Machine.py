@@ -20,7 +20,8 @@ class Idle(smach.State):
                              output_keys=['Idle_counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Idle')
+        #rospy.loginfo('Executing state Idle')
+        rospy.sleep(30)
         if userdata.e_stop == True:
             return 'kill'
         return 'outcome1'
@@ -34,7 +35,7 @@ class Wait_to_load(smach.State):
                              'counter_in', 'e_stop'], output_keys=['counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Wait_to_load')
+        #rospy.loginfo('Executing state Wait_to_load')
         if userdata.e_stop == True:
             return 'kill'
         return 'Full_Bucket'
@@ -49,7 +50,7 @@ class Wait_to_dump(smach.State):
                              'counter_in', 'e_stop'], output_keys=['counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Wait_to_dump')
+        #rospy.loginfo('Executing state Wait_to_dump')
         if userdata.e_stop == True:
             return 'kill'
         return 'Empty_Bucket'
@@ -63,7 +64,7 @@ class Lost(smach.State):
                              'counter_in', 'e_stop'], output_keys=['counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing Lost')
+        #rospy.loginfo('Executing Lost')
         if userdata.e_stop == True:
             return 'kill'
         return 'Minibot_lost'
@@ -77,7 +78,7 @@ class Kill(smach.State):
         smach.State.__init__(self, outcomes=['Kill'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing Kill')
+        #rospy.loginfo('Executing Kill')
         return 'Kill'
 
 # define state Stuck
@@ -90,7 +91,7 @@ class Stuck(smach.State):
                              'counter_in', 'e_stop'], output_keys=['counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Praying for Mercy')
+        #rospy.loginfo('Praying for Mercy')
         if userdata.e_stop == True:
             return 'kill'
         return 'Stuck'
@@ -107,8 +108,8 @@ class Drive(smach.State):
                              input_keys=['Drive_counter_in', 'e_stop'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Drive')
-        rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
+        #rospy.loginfo('Executing state Drive')
+        #rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
         if userdata.e_stop == True:
             return 'kill'
         if userdata.Drive_counter_in == 1:
@@ -256,4 +257,4 @@ def minibot_main():
 
 
 if __name__ == '__main__':
-    main()
+    minibot_main()

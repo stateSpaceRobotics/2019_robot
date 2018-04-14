@@ -5,6 +5,7 @@ import roslib
 import rospy
 import smach
 import smach_ros
+from std_msgs.msg import Bool
 from move_base_msgs.msg import *
 
 # define state Idle
@@ -19,7 +20,7 @@ class Idle(smach.State):
                              output_keys=['Idle_counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Idle')
+        #rospy.loginfo('Executing state Idle')
         if userdata.e_stop == True:
             return 'kill'
         if userdata.Idle_counter_in < 3:
@@ -35,7 +36,7 @@ class Dump_Prep(smach.State):
                              input_keys=['e_stop'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Dump Prep')
+        #rospy.loginfo('Executing state Dump Prep')
         if userdata.e_stop == True:
             return 'kill'
         return 'Minibot_in_place'
@@ -50,7 +51,7 @@ class Dump(smach.State):
                              input_keys=['e_stop'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Dump')
+        #rospy.loginfo('Executing state Dump')
         if userdata.e_stop == True:
             return 'kill'
         return 'Minibot_empty'
@@ -64,7 +65,7 @@ class Kill(smach.State):
         smach.State.__init__(self, outcomes=['Kill'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing Kill')
+        #rospy.loginfo('Executing Kill')
         return 'Kill'
 
 # define state Stuck
@@ -77,7 +78,7 @@ class Stuck(smach.State):
                              input_keys=['e_stop'])
 
     def execute(self, userdata):
-        rospy.loginfo('Praying for Mercy')
+        #rospy.loginfo('Praying for Mercy')
         if userdata.e_stop == True:
             return 'kill'
         return 'Stuck'
@@ -93,10 +94,10 @@ class Drive(smach.State):
                              input_keys=['Drive_counter_in', 'e_stop'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Drive')
+        #rospy.loginfo('Executing state Drive')
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
+        #rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
         return 'outcome1'
 
 
@@ -125,7 +126,7 @@ def sensortower_main():
 #                               remapping={'Drive_counter_in': 'sm_counter',
 #                                          'e_stop': 'e_stop'})
 
-        def drive_cb(userdata, goal):
+        def drive_goal_cb(userdata, goal):
             drive_goal = MoveBaseGoal()
             drive_goal.target_pose.header.frame_id = "/map"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
@@ -136,12 +137,20 @@ def sensortower_main():
 
             return drive_goal
 
+        def drive_result_cb(userdata, status, result):
+            rospy.loginfo('[SENSOR]: status is %s', status)
+            pub = rospy.Publisher(
+                '/smach_flags/dumper_in_pos', Bool, queue_size=1, latch=True)
+            pub.publish(True)
+
         smach.StateMachine.add('Drive',
                                smach_ros.SimpleActionState('/dumper/move_base',
                                                            MoveBaseAction,
-                                                           goal_cb=drive_cb,
+                                                           goal_cb=drive_goal_cb,
+                                                           result_cb=drive_result_cb,
                                                            input_keys=[
-                                                               'aruco_pose']),
+                                                               'aruco_pose'
+                                                           ]),
                                transitions={'succeeded': 'Dump_Prep',
                                             'aborted': 'Stuck',
                                             'preempted': 'Drive'},
@@ -172,6 +181,7 @@ def sensortower_main():
     # Create and start the introspection server
     #sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
     # sis.start()
+
 
     # Execute the state machine
     #outcome = sm_sensortower.execute()

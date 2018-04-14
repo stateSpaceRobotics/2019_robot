@@ -19,7 +19,7 @@ class Startup(smach.State):
                              input_keys=['e_stop'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Idle')
+        #rospy.loginfo('Executing state Idle')
         if userdata.e_stop == True:
             return 'kill'
         return 'begin'
@@ -27,11 +27,15 @@ class Startup(smach.State):
 
 def main():
     rospy.init_node('smach_example_state_machine')
-
+    global sm
     # Create a SMACH state machine
     sm = smach.StateMachine(outcomes=['outcome4'])
     sm.userdata.sm_counter = 0
     sm.userdata.e_stop = False
+    sm.userdata.dumper_in_pos = False
+    sm.userdata.digger_in_pos = False
+    sm.userdata.transporter_ready_to_dump = False
+    sm.userdata.transporter_ready_to_load = False
 
     sm_sensortower = SensorTower_State_Machine.sensortower_main()
     sm_diggerbot = Diggerbot_State_Machine.diggerbot_main()
@@ -63,14 +67,14 @@ def main():
     # .....
     # Creating of state machine sm finished
     # Create and start the introspection server
-    sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
-    sis.start()
+    #sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
+    # sis.start()
 
     # Execute the state machine
     outcome = sm.execute()
     # Wait for ctrl-c to stop the application
     rospy.spin()
-    sis.stop()
+    # sis.stop()
     outcome.stop()
 
 

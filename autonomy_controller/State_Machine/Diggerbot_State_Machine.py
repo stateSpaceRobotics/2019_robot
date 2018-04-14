@@ -5,6 +5,7 @@ import roslib
 import rospy
 import smach
 import smach_ros
+from std_msgs.msg import Bool
 from move_base_msgs.msg import *
 
 # define state Idle
@@ -13,20 +14,28 @@ from move_base_msgs.msg import *
 
 class Idle(smach.State):
     def __init__(self):
+        self.dumper_in_pos = False
+        sub = rospy.Subscriber(
+            '/smach_flags/dumper_in_pos', Bool, self.callback)
         smach.State.__init__(self,
                              outcomes=['outcome1', 'outcome2', 'kill'],
-                             input_keys=['Idle_counter_in', 'e_stop'],
+                             input_keys=['Idle_counter_in',
+                                         'e_stop'],
                              output_keys=['Idle_counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Idle')
+        # rospy.loginfo('Executing state Idle')
         if userdata.e_stop == True:
             return 'kill'
-        if userdata.Idle_counter_in < 3:
-            userdata.Idle_counter_out = userdata.Idle_counter_in + 1
+        if self.dumper_in_pos == True:
+            rospy.loginfo('[DIGGER]: dumper_in_pos was True')
             return 'outcome1'
         else:
+            rospy.sleep(2)
             return 'outcome2'
+
+    def callback(self, data):
+        self.dumper_in_pos = data.data
 
 # define state Dig_Prep
 #
@@ -40,7 +49,7 @@ class Dig_Prep(smach.State):
     def execute(self, userdata):
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Executing state Dig_Prep')
+        # rospy.loginfo('Executing state Dig_Prep')
         return 'Success'
 
 # define state Dig
@@ -55,7 +64,7 @@ class Dig(smach.State):
     def execute(self, userdata):
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Executing state Dig')
+        # rospy.loginfo('Executing state Dig')
         return 'Success'
 
 # define state Load_Prep
@@ -69,7 +78,7 @@ class Load_Prep(smach.State):
     def execute(self, userdata):
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Executing Load Prep')
+        # rospy.loginfo('Executing Load Prep')
         return 'Minibot_in_place'
 
 # define state Load
@@ -84,7 +93,7 @@ class Load(smach.State):
     def execute(self, userdata):
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Executing Load')
+        # rospy.loginfo('Executing Load')
         return 'Load_Successful'
 
 # define state Stuck
@@ -99,7 +108,7 @@ class Stuck(smach.State):
     def execute(self, userdata):
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Praying for Mercy')
+        # rospy.loginfo('Praying for Mercy')
         return 'Stuck'
 
 # define state Drive
@@ -115,8 +124,8 @@ class Drive(smach.State):
     def execute(self, userdata):
         if userdata.e_stop == True:
             return 'kill'
-        rospy.loginfo('Executing state Drive')
-        rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
+        # rospy.loginfo('Executing state Drive')
+        # rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
         return 'outcome1'
 
 # define state Kill
@@ -128,7 +137,7 @@ class Kill(smach.State):
         smach.State.__init__(self, outcomes=['Kill'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing Kill')
+        # rospy.loginfo('Executing Kill')
         return 'Kill'
 
 
@@ -149,7 +158,7 @@ def diggerbot_main():
         smach.StateMachine.add('Idle', Idle(),
                                transitions={'outcome1': 'Drive',
                                             'kill': 'Kill',
-                                            'outcome2': 'end'},
+                                            'outcome2': 'Idle'},
                                remapping={'Idle_counter_in': 'sm_counter',
                                           'e_stop': 'e_stop',
                                           'Idle_counter_out': 'sm_counter'})
@@ -264,11 +273,11 @@ def diggerbot_main():
     # .....
     # Creating of state machine sm finished
     # Create and start the introspection server
-    #sis = smach_ros.IntrospectionServer('server_name', sm_diggerbot, '/SM_ROOT')
+    # sis = smach_ros.IntrospectionServer('server_name', sm_diggerbot, '/SM_ROOT')
     # sis.start()
 
     # Execute the state machine
-    #outcome = sm_diggerbot.execute()
+    # outcome = sm_diggerbot.execute()
     # Wait for ctrl-c to stop the application
     # rospy.spin()
     # sis.stop()
