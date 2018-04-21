@@ -5,6 +5,7 @@ import roslib
 import rospy
 import smach
 import smach_ros
+import tf2_ros
 from std_msgs.msg import Bool
 from move_base_msgs.msg import *
 
@@ -178,9 +179,9 @@ def diggerbot_main():
             drive_goal.target_pose.header.frame_id = "/map"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 2.0
+            drive_goal.target_pose.pose.position.x = 1.0
             drive_goal.target_pose.pose.position.y = 6.0
-            drive_goal.target_pose.pose.orientation.w = 1.0
+            drive_goal.target_pose.pose.orientation.z = 1.0
 
             return drive_goal
 

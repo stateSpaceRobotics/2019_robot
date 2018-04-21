@@ -173,8 +173,8 @@ def minibot_main():
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
             drive_goal.target_pose.pose.position.x = 2.0
-            drive_goal.target_pose.pose.position.y = 5.5
-            drive_goal.target_pose.pose.orientation.w = 1.0
+            drive_goal.target_pose.pose.position.y = 6.0
+            drive_goal.target_pose.pose.orientation.z = 1.0
 
             return drive_goal
 
@@ -197,7 +197,8 @@ def minibot_main():
 
             drive_goal.target_pose.pose.position.x = 2.0
             drive_goal.target_pose.pose.position.y = 1.5
-            drive_goal.target_pose.pose.orientation.w = 1.0
+            drive_goal.target_pose.pose.orientation.w = -0.707
+            drive_goal.target_pose.pose.orientation.z = 0.707
 
             return drive_goal
 

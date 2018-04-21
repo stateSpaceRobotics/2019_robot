@@ -1,7 +1,9 @@
 <launch>
 
-    <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch" />
+    <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch">
+    <arg name="stage_sim" value="multi_bot_obstacles.launch" />
+    </include>
 
-    <node pkg="autonomy_controller" type="Total_State_Machine.py" name="state_machine" />
+    <node pkg="autonomy_controller" type="Total_State_Machine.py" name="state_machine" output="screen"/>
 
 </launch>

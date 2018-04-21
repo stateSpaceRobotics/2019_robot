@@ -5,8 +5,10 @@ import roslib
 import rospy
 import smach
 import smach_ros
+import tf2_ros
 from std_msgs.msg import Bool
 from move_base_msgs.msg import *
+from geometry_msgs.msg import Twist
 
 # define state Idle
 #
@@ -88,18 +90,35 @@ class Stuck(smach.State):
 # Lucas is responsible for path planning
 
 
-class Drive(smach.State):
+class Back_Up(smach.State):
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['outcome1', 'outcome2', 'kill'],
-                             input_keys=['Drive_counter_in', 'e_stop'])
+                             outcomes=['repeat', 'finished', 'kill'],
+                             input_keys=['e_stop'])
 
     def execute(self, userdata):
         #rospy.loginfo('Executing state Drive')
         if userdata.e_stop == True:
             return 'kill'
-        #rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
-        return 'outcome1'
+
+        tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(tfBuffer)
+
+        trans = tfBuffer.lookup_transform(
+            'robot_0/base_link', 'vive', rospy.Time(), rospy.Duration(2.0))
+
+        pub = rospy.Publisher(
+            '/dumper/cmd_vel', Twist)
+        cmd = Twist()
+
+        if trans.transform.translation.x < -0.2:
+            cmd.linear.x = -0.1
+            pub.publish(cmd)
+            return 'repeat'
+        else:
+            cmd.linear.x = 0
+            pub.publish(cmd)
+            return 'finished'
 
 
 def sensortower_main():
@@ -109,6 +128,10 @@ def sensortower_main():
     sm_sensortower = smach.StateMachine(outcomes=['end'])
     sm_sensortower.userdata.sm_counter = 0
     sm_sensortower.userdata.e_stop = False
+    sm_sensortower.userdata.rotation_array = [
+        [0.960, -0.280], [0.843, 0.537], [0.960, -0.280]]
+    global rotation_index
+    rotation_index = 0
 
     # Open the container
     with sm_sensortower:
@@ -132,30 +155,67 @@ def sensortower_main():
             drive_goal.target_pose.header.frame_id = "/map"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 2.0
-            drive_goal.target_pose.pose.position.y = 1.0
-            drive_goal.target_pose.pose.orientation.w = 1.0
+            drive_goal.target_pose.pose.position.x = 1.89
+            drive_goal.target_pose.pose.position.y = 0.5
+            drive_goal.target_pose.pose.orientation.w = 0.707
+            drive_goal.target_pose.pose.orientation.z = 0.707
 
             return drive_goal
-
-        def drive_result_cb(userdata, status, result):
-            rospy.loginfo('[SENSOR]: status is %s', status)
-            pub = rospy.Publisher(
-                '/smach_flags/dumper_in_pos', Bool, queue_size=1, latch=True)
-            pub.publish(True)
 
         smach.StateMachine.add('Drive',
                                smach_ros.SimpleActionState('/dumper/move_base',
                                                            MoveBaseAction,
                                                            goal_cb=drive_goal_cb,
-                                                           result_cb=drive_result_cb,
                                                            input_keys=[
                                                                'aruco_pose'
                                                            ]),
-                               transitions={'succeeded': 'Dump_Prep',
+                               transitions={'succeeded': 'Rotation',
                                             'aborted': 'Stuck',
                                             'preempted': 'Drive'},
                                remapping={'aruco_pose': 'userdata_aruco_pose'})
+
+        def rotation_goal_cb(userdata, goal):
+            drive_goal = MoveBaseGoal()
+            drive_goal.target_pose.header.frame_id = "/robot_0/base_link"
+            drive_goal.target_pose.header.stamp = rospy.get_rostime()
+
+            drive_goal.target_pose.pose.orientation.w = userdata.rotation_array[
+                rotation_index][0]
+            drive_goal.target_pose.pose.orientation.z = userdata.rotation_array[
+                rotation_index][1]
+
+            return drive_goal
+
+        @smach.cb_interface(outcomes=['finished'])
+        def rotation_result_cb(userdata, status, result):
+            global rotation_index
+            rotation_index += 1
+            if (rotation_index == 3):
+                rospy.loginfo('[SENSOR]: status is %s', status)
+                pub = rospy.Publisher(
+                    '/smach_flags/dumper_in_pos', Bool, queue_size=1, latch=True)
+                pub.publish(True)
+                return 'finished'
+
+        smach.StateMachine.add('Rotation',
+                               smach_ros.SimpleActionState('/dumper/move_base',
+                                                           MoveBaseAction,
+                                                           goal_cb=rotation_goal_cb,
+                                                           result_cb=rotation_result_cb,
+                                                           input_keys=[
+                                                               'rotation_array'
+                                                           ]),
+                               transitions={'succeeded': 'Rotation',
+                                            'aborted': 'Stuck',
+                                            'preempted': 'Drive',
+                                            'finished': 'Back_Up'},
+                               remapping={'rotation_array': 'rotation_array'})
+
+        smach.StateMachine.add('Back_Up', Back_Up(),
+                               transitions={'finished': 'Dump_Prep',
+                                            'repeat': 'Back_Up',
+                                            'kill': 'Kill'},
+                               remapping={'e_stop': 'e_stop'})
 
         smach.StateMachine.add('Dump_Prep', Dump_Prep(),
                                transitions={'Minibot_in_place': 'Dump',
