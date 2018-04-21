@@ -14,7 +14,7 @@ include "dumper.inc"
 include "digger.inc"
 
 # Instantiate a dumper robot
-dumper( pose [1 1 0 0] name "dumper" color "red")
+dumper( pose 0.945 0.75 0 0] name "dumper" color "red")
 
 # Load obstacles here
 # Example:

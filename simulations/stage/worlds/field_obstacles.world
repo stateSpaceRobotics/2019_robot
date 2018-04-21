@@ -15,7 +15,8 @@ include "digger.inc"
 
 # Load obstacles here
 # Example:
-obstacle( pose [0.51 4.27 0 0] color "black")
-obstacle( pose [1.09 3.27 0 0] color "black")
-obstacle( pose [1.89 4.21 0 0] color "black")
-obstacle( pose [2.89 3.66 0 0] color "black")
+obstacle_sm( pose [0.80 3.15 0 0] color "black")
+obstacle_md( pose [1.49 3.94 0 0] color "black")
+obstacle_md( pose [2.12 2.00 0 0] color "black")
+obstacle_sm( pose [2.21 3.45 0 0] color "black")
+obstacle_lg( pose [2.83 2.98 0 0] color "black")
