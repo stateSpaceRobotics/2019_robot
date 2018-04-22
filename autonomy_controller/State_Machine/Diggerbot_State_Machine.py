@@ -180,7 +180,7 @@ def diggerbot_main():
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
             drive_goal.target_pose.pose.position.x = 1.0
-            drive_goal.target_pose.pose.position.y = 6.0
+            drive_goal.target_pose.pose.position.y = 5.0
             drive_goal.target_pose.pose.orientation.z = 1.0
 
             return drive_goal

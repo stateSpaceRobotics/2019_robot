@@ -6,8 +6,10 @@ import roslib
 import rospy
 import smach
 import smach_ros
+import tf2_ros
 from std_msgs.msg import Bool
 from move_base_msgs.msg import *
+from geometry_msgs.msg import Twist
 
 # define state Idle
 #
@@ -111,28 +113,62 @@ class Stuck(smach.State):
 # Lucas is responsible for path planning
 
 
-class Drive(smach.State):
+class Back_Up_Load(smach.State):
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['outcome1', 'outcome2',
-                                       'outcome3', 'outcome4', 'kill'],
-                             input_keys=['Drive_counter_in', 'e_stop'])
+                             outcomes=['finished', 'repeat', 'kill'],
+                             input_keys=['e_stop'])
 
     def execute(self, userdata):
         #rospy.loginfo('Executing state Drive')
         #rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
-        if userdata.e_stop == True:
-            return 'kill'
-        if userdata.Drive_counter_in == 1:
-            return 'outcome1'
-        elif userdata.Drive_counter_in == 2:
-            return 'outcome2'
-        elif userdata.Drive_counter_in == 3:
-            return 'outcome3'
-        elif userdata.Drive_counter_in == 4:
-            return 'outcome4'
-        elif userdata.Drive_counter_in == 5:
-            return 'outcome4'
+        tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(tfBuffer)
+
+        trans = tfBuffer.lookup_transform(
+            'robot_2/base_link', 'robot_1/base_link', rospy.Time(), rospy.Duration(2.0))
+
+        pub = rospy.Publisher(
+            '/transporter/cmd_vel', Twist)
+        cmd = Twist()
+
+        if trans.transform.translation.x < 0.4:
+            cmd.linear.x = -0.1
+            pub.publish(cmd)
+            return 'repeat'
+        else:
+            cmd.linear.x = 0
+            pub.publish(cmd)
+            return 'finished'
+
+
+class Back_Up_Dump(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['finished', 'repeat', 'kill'],
+                             input_keys=['e_stop'])
+
+    def execute(self, userdata):
+        #rospy.loginfo('Executing state Drive')
+        #rospy.loginfo('Counter = %f' % userdata.Drive_counter_in)
+        tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(tfBuffer)
+
+        trans = tfBuffer.lookup_transform(
+            'robot_2/base_link', 'robot_0/base_link', rospy.Time(), rospy.Duration(2.0))
+
+        pub = rospy.Publisher(
+            '/transporter/cmd_vel', Twist)
+        cmd = Twist()
+
+        if trans.transform.translation.x < 0.4:
+            cmd.linear.x = -0.1
+            pub.publish(cmd)
+            return 'repeat'
+        else:
+            cmd.linear.x = 0
+            pub.publish(cmd)
+            return 'finished'
 
 
 def minibot_main():
@@ -169,12 +205,11 @@ def minibot_main():
 
         def drive_to_digger_cb(userdata, goal):
             drive_goal = MoveBaseGoal()
-            drive_goal.target_pose.header.frame_id = "/map"
+            drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 2.0
-            drive_goal.target_pose.pose.position.y = 6.0
-            drive_goal.target_pose.pose.orientation.z = 1.0
+            drive_goal.target_pose.pose.position.x = -0.5
+            drive_goal.target_pose.pose.orientation.w = 1.0
 
             return drive_goal
 
@@ -185,20 +220,57 @@ def minibot_main():
                                                            input_keys=[
                                                                'goal_pose'
                                                            ]),
-                               transitions={'succeeded': 'Wait_to_load',
+                               transitions={'succeeded': 'Load_Prep',
                                             'aborted': 'Stuck',
                                             'preempted': 'Drive_to_digger'},
                                remapping={'goal_pose': 'userdata_goal_post'})
 
-        def drive_to_dumper_cb(userdata, goal):
+        def load_prep_cb(userdata, goal):
             drive_goal = MoveBaseGoal()
-            drive_goal.target_pose.header.frame_id = "/map"
+            drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 2.0
-            drive_goal.target_pose.pose.position.y = 1.5
-            drive_goal.target_pose.pose.orientation.w = -0.707
-            drive_goal.target_pose.pose.orientation.z = 0.707
+            drive_goal.target_pose.pose.position.x = -0.15
+            drive_goal.target_pose.pose.orientation.w = 1.0
+
+            return drive_goal
+
+        smach.StateMachine.add('Load_Prep',
+                               smach_ros.SimpleActionState('/transporter/move_base',
+                                                           MoveBaseAction,
+                                                           goal_cb=load_prep_cb,
+                                                           input_keys=[
+                                                               'goal_pose'
+                                                           ]),
+                               transitions={'succeeded': 'Wait_to_load',
+                                            'aborted': 'Stuck',
+                                            'preempted': 'Load_Prep'},
+                               remapping={'goal_pose': 'userdata_goal_post'})
+
+# STATE WAIT_TO_LOAD
+
+        smach.StateMachine.add('Wait_to_load', Wait_to_load(), transitions={'Full_Bucket': 'Back_Up_Load',
+                                                                            'kill': 'Kill'},
+                               remapping={'counter_in': 'sm_counter',
+                                          'e_stop': 'e_stop',
+                                          'counter_out': 'sm_counter'})
+
+# STATE BACK_UP_LOAD
+
+        smach.StateMachine.add('Back_Up_Load', Back_Up_Load(), transitions={'finished': 'Drive_to_dumper',
+                                                                            'repeat': 'Back_Up_Load',
+                                                                            'kill': 'Kill'},
+                               remapping={'counter_in': 'sm_counter',
+                                          'e_stop': 'e_stop',
+                                          'counter_out': 'sm_counter'})
+
+        def drive_to_dumper_cb(userdata, goal):
+            drive_goal = MoveBaseGoal()
+            drive_goal.target_pose.header.frame_id = "/robot_0/base_link"
+            drive_goal.target_pose.header.stamp = rospy.get_rostime()
+
+            drive_goal.target_pose.pose.position.x = 0.5
+            drive_goal.target_pose.pose.orientation.z = 1
 
             return drive_goal
 
@@ -209,23 +281,43 @@ def minibot_main():
                                                            input_keys=[
                                                                'goal_pose'
                                                            ]),
-                               transitions={'succeeded': 'Wait_to_dump',
+                               transitions={'succeeded': 'Dump_Prep',
                                             'aborted': 'Stuck',
                                             'preempted': 'Drive_to_dumper'},
                                remapping={'goal_pose': 'userdata_goal_post'})
 
-# STATE WAIT_TO_LOAD
+        def dump_prep_cb(userdata, goal):
+            drive_goal = MoveBaseGoal()
+            drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
+            drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-        smach.StateMachine.add('Wait_to_load', Wait_to_load(), transitions={'Full_Bucket': 'Drive_to_dumper',
+            drive_goal.target_pose.pose.position.x = 0.15
+            drive_goal.target_pose.pose.orientation.z = 1.0
+
+            return drive_goal
+
+        smach.StateMachine.add('Dump_Prep',
+                               smach_ros.SimpleActionState('/transporter/move_base',
+                                                           MoveBaseAction,
+                                                           goal_cb=load_prep_cb,
+                                                           input_keys=[
+                                                               'goal_pose'
+                                                           ]),
+                               transitions={'succeeded': 'Wait_to_dump',
+                                            'aborted': 'Stuck',
+                                            'preempted': 'Dump_Prep'},
+                               remapping={'goal_pose': 'userdata_goal_post'})
+# STATE WAIT_TO_DUMP
+
+        smach.StateMachine.add('Wait_to_dump', Wait_to_dump(), transitions={'Empty_Bucket': 'Back_Up_Dump',
+                                                                            'Sensors Lost': 'Lost',
                                                                             'kill': 'Kill'},
                                remapping={'counter_in': 'sm_counter',
                                           'e_stop': 'e_stop',
                                           'counter_out': 'sm_counter'})
 
-# STATE WAIT_TO_DUMP
-
-        smach.StateMachine.add('Wait_to_dump', Wait_to_dump(), transitions={'Empty_Bucket': 'Drive_to_digger',
-                                                                            'Sensors Lost': 'Lost',
+        smach.StateMachine.add('Back_Up_Dump', Back_Up_Dump(), transitions={'finished': 'Drive_to_digger',
+                                                                            'repeat': 'Back_Up_Dump',
                                                                             'kill': 'Kill'},
                                remapping={'counter_in': 'sm_counter',
                                           'e_stop': 'e_stop',
