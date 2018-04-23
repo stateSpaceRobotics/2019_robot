@@ -1315,7 +1315,7 @@
           <geometry>
             <mesh>
               <uri>/home/ssr/ros_kinetic/rmc_dev_ws/src/2018_robot/simulations/gazebo_rmc_sim/models/Digger/Simple_Chassis.stl</uri>
-              <scale>1 1 1</scale>
+              <scale>0.001 0.001 0.001</scale>
             </mesh>
           </geometry>
           <material>
@@ -1342,7 +1342,7 @@
           <geometry>
             <mesh>
               <uri>/home/ssr/ros_kinetic/rmc_dev_ws/src/2018_robot/simulations/gazebo_rmc_sim/models/Digger/Simple_Chassis.stl</uri>
-              <scale>1 1 1</scale>
+              <scale>0.001 0.001 0.001</scale>
             </mesh>
           </geometry>
           <surface>
@@ -1414,7 +1414,7 @@
           <geometry>
             <mesh>
               <uri>/home/ssr/ros_kinetic/rmc_dev_ws/src/2018_robot/simulations/gazebo_rmc_sim/models/Digger/Simple_Arm.stl</uri>
-              <scale>1 1 1</scale>
+              <scale>0.001 0.001 0.001</scale>
             </mesh>
           </geometry>
           <material>
@@ -2338,7 +2338,7 @@
             <lighting>1</lighting>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Black</name>
             </script>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2437,7 +2437,7 @@
             <lighting>1</lighting>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Black</name>
             </script>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2536,7 +2536,7 @@
             <lighting>1</lighting>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Black</name>
             </script>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2635,7 +2635,7 @@
             <lighting>1</lighting>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Black</name>
             </script>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
