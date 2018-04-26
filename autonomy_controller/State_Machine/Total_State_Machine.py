@@ -81,8 +81,8 @@ def main():
     # .....
     # Creating of state machine sm finished
     # Create and start the introspection server
-    #sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
-    # sis.start()
+    sis = smach_ros.IntrospectionServer('total_state_machine', sm, '/SM_ROOT')
+    sis.start()
 
     # Execute the state machine
     outcome = sm.execute()

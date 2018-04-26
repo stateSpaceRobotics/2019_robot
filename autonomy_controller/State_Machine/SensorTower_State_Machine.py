@@ -39,7 +39,7 @@ class Dump_Prep(smach.State):
 
     def execute(self, userdata):
         #rospy.loginfo('Executing state Dump Prep')
-        rospy.sleep(60)
+        return 'kill'
         if userdata.e_stop == True:
             return 'kill'
         return 'Minibot_in_place'

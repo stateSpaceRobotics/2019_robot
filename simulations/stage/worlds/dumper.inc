@@ -26,9 +26,9 @@ define sick ranger
 define topurg ranger
 (
   sensor(
-    range_max 30.0
+    range [0 7.0]
     fov 60
-    samples 1000
+    samples 1081
   )
   # generic model properties
   color "black"

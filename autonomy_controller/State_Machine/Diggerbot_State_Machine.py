@@ -48,7 +48,7 @@ class Dig_Prep(smach.State):
             self, outcomes=['Success', 'kill'], input_keys=['e_stop'])
 
     def execute(self, userdata):
-        rospy.sleep(60)
+        return 'kill'
         if userdata.e_stop == True:
             return 'kill'
         # rospy.loginfo('Executing state Dig_Prep')
@@ -78,7 +78,7 @@ class Load_Prep(smach.State):
             self, outcomes=['Minibot_in_place', 'kill'], input_keys=['e_stop'])
 
     def execute(self, userdata):
-        rospy.sleep(60)
+        return 'kill'
         if userdata.e_stop == True:
             return 'kill'
         # rospy.loginfo('Executing Load Prep')

@@ -132,12 +132,12 @@ class Back_Up_Load(smach.State):
             '/transporter/cmd_vel', Twist)
         cmd = Twist()
 
-        if trans.transform.translation.x < 0.4:
+        if trans.transform.translation.x < 0.8:
             cmd.linear.x = -0.1
             pub.publish(cmd)
             return 'repeat'
         else:
-            cmd.linear.x = 0
+            cmd.linear.x = 0.0
             pub.publish(cmd)
             return 'finished'
 
@@ -166,7 +166,7 @@ class Back_Up_Dump(smach.State):
             pub.publish(cmd)
             return 'repeat'
         else:
-            cmd.linear.x = 0
+            cmd.linear.x = 0.0
             pub.publish(cmd)
             return 'finished'
 
@@ -208,7 +208,7 @@ def minibot_main():
             drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = -0.5
+            drive_goal.target_pose.pose.position.x = -1.5
             drive_goal.target_pose.pose.orientation.w = 1.0
 
             return drive_goal
@@ -230,7 +230,7 @@ def minibot_main():
             drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = -0.15
+            drive_goal.target_pose.pose.position.x = -0.21
             drive_goal.target_pose.pose.orientation.w = 1.0
 
             return drive_goal
@@ -257,12 +257,34 @@ def minibot_main():
 
 # STATE BACK_UP_LOAD
 
-        smach.StateMachine.add('Back_Up_Load', Back_Up_Load(), transitions={'finished': 'Drive_to_dumper',
+        smach.StateMachine.add('Back_Up_Load', Back_Up_Load(), transitions={'finished': 'Turn_from_digger',
                                                                             'repeat': 'Back_Up_Load',
                                                                             'kill': 'Kill'},
                                remapping={'counter_in': 'sm_counter',
                                           'e_stop': 'e_stop',
                                           'counter_out': 'sm_counter'})
+
+        def turn_from_digger_cb(userdata, goal):
+            drive_goal = MoveBaseGoal()
+            drive_goal.target_pose.header.frame_id = "/robot_2/base_link"
+            drive_goal.target_pose.header.stamp = rospy.get_rostime()
+
+            drive_goal.target_pose.pose.orientation.w = 0.707
+            drive_goal.target_pose.pose.orientation.z = 0.707
+
+            return drive_goal
+
+        smach.StateMachine.add('Turn_from_digger',
+                               smach_ros.SimpleActionState('/transporter/move_base',
+                                                           MoveBaseAction,
+                                                           goal_cb=turn_from_digger_cb,
+                                                           input_keys=[
+                                                               'goal_pose'
+                                                           ]),
+                               transitions={'succeeded': 'Drive_to_dumper',
+                                            'aborted': 'Stuck',
+                                            'preempted': 'Turn_from_digger'},
+                               remapping={'goal_pose': 'userdata_goal_post'})
 
         def drive_to_dumper_cb(userdata, goal):
             drive_goal = MoveBaseGoal()
@@ -288,10 +310,10 @@ def minibot_main():
 
         def dump_prep_cb(userdata, goal):
             drive_goal = MoveBaseGoal()
-            drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
+            drive_goal.target_pose.header.frame_id = "/robot_0/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 0.15
+            drive_goal.target_pose.pose.position.x = 0.21
             drive_goal.target_pose.pose.orientation.z = 1.0
 
             return drive_goal
@@ -299,7 +321,7 @@ def minibot_main():
         smach.StateMachine.add('Dump_Prep',
                                smach_ros.SimpleActionState('/transporter/move_base',
                                                            MoveBaseAction,
-                                                           goal_cb=load_prep_cb,
+                                                           goal_cb=dump_prep_cb,
                                                            input_keys=[
                                                                'goal_pose'
                                                            ]),
@@ -316,12 +338,33 @@ def minibot_main():
                                           'e_stop': 'e_stop',
                                           'counter_out': 'sm_counter'})
 
-        smach.StateMachine.add('Back_Up_Dump', Back_Up_Dump(), transitions={'finished': 'Drive_to_digger',
+        smach.StateMachine.add('Back_Up_Dump', Back_Up_Dump(), transitions={'finished': 'Turn_from_dumper',
                                                                             'repeat': 'Back_Up_Dump',
                                                                             'kill': 'Kill'},
                                remapping={'counter_in': 'sm_counter',
                                           'e_stop': 'e_stop',
                                           'counter_out': 'sm_counter'})
+
+        def turn_from_dumper_cb(userdata, goal):
+            drive_goal = MoveBaseGoal()
+            drive_goal.target_pose.header.frame_id = "/robot_2/base_link"
+            drive_goal.target_pose.header.stamp = rospy.get_rostime()
+
+            drive_goal.target_pose.pose.orientation.z = 1.0
+
+            return drive_goal
+
+        smach.StateMachine.add('Turn_from_dumper',
+                               smach_ros.SimpleActionState('/transporter/move_base',
+                                                           MoveBaseAction,
+                                                           goal_cb=turn_from_dumper_cb,
+                                                           input_keys=[
+                                                               'goal_pose'
+                                                           ]),
+                               transitions={'succeeded': 'Drive_to_digger',
+                                            'aborted': 'Stuck',
+                                            'preempted': 'Turn_from_dumper'},
+                               remapping={'goal_pose': 'userdata_goal_post'})
 
 # STATE LOST
 
