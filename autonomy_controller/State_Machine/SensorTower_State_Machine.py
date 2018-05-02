@@ -111,7 +111,7 @@ class Back_Up(smach.State):
             '/dumper/cmd_vel', Twist)
         cmd = Twist()
 
-        if trans.transform.translation.x < -0.2:
+        if trans.transform.translation.x < -0.45:
             cmd.linear.x = -0.1
             pub.publish(cmd)
             return 'repeat'
@@ -156,7 +156,7 @@ def sensortower_main():
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
             drive_goal.target_pose.pose.position.x = 1.89
-            drive_goal.target_pose.pose.position.y = 0.5
+            drive_goal.target_pose.pose.position.y = 0.8
             drive_goal.target_pose.pose.orientation.w = 0.707
             drive_goal.target_pose.pose.orientation.z = 0.707
 
