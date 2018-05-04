@@ -132,7 +132,7 @@ class Back_Up_Load(smach.State):
             '/transporter/cmd_vel', Twist)
         cmd = Twist()
 
-        if trans.transform.translation.x < 0.8:
+        if trans.transform.translation.x < 0.7:
             cmd.linear.x = -0.1
             pub.publish(cmd)
             return 'repeat'
@@ -161,7 +161,7 @@ class Back_Up_Dump(smach.State):
             '/transporter/cmd_vel', Twist)
         cmd = Twist()
 
-        if trans.transform.translation.x < 0.4:
+        if trans.transform.translation.x < 0.7:
             cmd.linear.x = -0.1
             pub.publish(cmd)
             return 'repeat'
@@ -208,7 +208,7 @@ def minibot_main():
             drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = -1.5
+            drive_goal.target_pose.pose.position.x = -1.0
             drive_goal.target_pose.pose.orientation.w = 1.0
 
             return drive_goal
@@ -230,7 +230,7 @@ def minibot_main():
             drive_goal.target_pose.header.frame_id = "/robot_1/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = -0.21
+            drive_goal.target_pose.pose.position.x = -0.55
             drive_goal.target_pose.pose.orientation.w = 1.0
 
             return drive_goal
@@ -291,7 +291,7 @@ def minibot_main():
             drive_goal.target_pose.header.frame_id = "/robot_0/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 0.5
+            drive_goal.target_pose.pose.position.x = 0.7
             drive_goal.target_pose.pose.orientation.z = 1
 
             return drive_goal
@@ -313,7 +313,7 @@ def minibot_main():
             drive_goal.target_pose.header.frame_id = "/robot_0/base_link"
             drive_goal.target_pose.header.stamp = rospy.get_rostime()
 
-            drive_goal.target_pose.pose.position.x = 0.21
+            drive_goal.target_pose.pose.position.x = 0.5
             drive_goal.target_pose.pose.orientation.z = 1.0
 
             return drive_goal
