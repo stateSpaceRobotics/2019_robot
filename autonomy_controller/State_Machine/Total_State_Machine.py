@@ -23,13 +23,13 @@ class Startup(smach.State):
     def execute(self, userdata):
         #rospy.loginfo('Executing state Idle')
         dumper = actionlib.SimpleActionClient(
-            '/dumper/move_base', MoveBaseAction)
+            '/dumper/move_base_recovery', MoveBaseAction)
 
         digger = actionlib.SimpleActionClient(
-            '/digger/move_base', MoveBaseAction)
+            '/digger/move_base_recovery', MoveBaseAction)
 
         transporter = actionlib.SimpleActionClient(
-            '/transporter/move_base', MoveBaseAction)
+            '/transporter/move_base_recovery', MoveBaseAction)
 
         dumper.wait_for_server()
         digger.wait_for_server()
@@ -88,7 +88,7 @@ def main():
     outcome = sm.execute()
     # Wait for ctrl-c to stop the application
     rospy.spin()
-    # sis.stop()
+    sis.stop()
     outcome.stop()
 
 

@@ -163,7 +163,7 @@ def sensortower_main():
             return drive_goal
 
         smach.StateMachine.add('Drive',
-                               smach_ros.SimpleActionState('/dumper/move_base',
+                               smach_ros.SimpleActionState('/dumper/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=drive_goal_cb,
                                                            input_keys=[
@@ -198,7 +198,7 @@ def sensortower_main():
                 return 'finished'
 
         smach.StateMachine.add('Rotation',
-                               smach_ros.SimpleActionState('/dumper/move_base',
+                               smach_ros.SimpleActionState('/dumper/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=rotation_goal_cb,
                                                            result_cb=rotation_result_cb,

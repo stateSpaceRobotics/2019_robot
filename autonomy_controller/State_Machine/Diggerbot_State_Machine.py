@@ -192,7 +192,7 @@ def diggerbot_main():
             pub.publish(True)
 
         smach.StateMachine.add('Drive',
-                               smach_ros.SimpleActionState('/digger/move_base',
+                               smach_ros.SimpleActionState('/digger/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=drive_goal_cb,
                                                            result_cb=drive_result_cb,

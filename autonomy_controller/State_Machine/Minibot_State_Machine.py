@@ -214,7 +214,7 @@ def minibot_main():
             return drive_goal
 
         smach.StateMachine.add('Drive_to_digger',
-                               smach_ros.SimpleActionState('/transporter/move_base',
+                               smach_ros.SimpleActionState('/transporter/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=drive_to_digger_cb,
                                                            input_keys=[
@@ -236,7 +236,7 @@ def minibot_main():
             return drive_goal
 
         smach.StateMachine.add('Load_Prep',
-                               smach_ros.SimpleActionState('/transporter/move_base',
+                               smach_ros.SimpleActionState('/transporter/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=load_prep_cb,
                                                            input_keys=[
@@ -275,7 +275,7 @@ def minibot_main():
             return drive_goal
 
         smach.StateMachine.add('Turn_from_digger',
-                               smach_ros.SimpleActionState('/transporter/move_base',
+                               smach_ros.SimpleActionState('/transporter/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=turn_from_digger_cb,
                                                            input_keys=[
@@ -297,7 +297,7 @@ def minibot_main():
             return drive_goal
 
         smach.StateMachine.add('Drive_to_dumper',
-                               smach_ros.SimpleActionState('/transporter/move_base',
+                               smach_ros.SimpleActionState('/transporter/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=drive_to_dumper_cb,
                                                            input_keys=[
@@ -319,7 +319,7 @@ def minibot_main():
             return drive_goal
 
         smach.StateMachine.add('Dump_Prep',
-                               smach_ros.SimpleActionState('/transporter/move_base',
+                               smach_ros.SimpleActionState('/transporter/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=dump_prep_cb,
                                                            input_keys=[
@@ -355,7 +355,7 @@ def minibot_main():
             return drive_goal
 
         smach.StateMachine.add('Turn_from_dumper',
-                               smach_ros.SimpleActionState('/transporter/move_base',
+                               smach_ros.SimpleActionState('/transporter/move_base_recovery',
                                                            MoveBaseAction,
                                                            goal_cb=turn_from_dumper_cb,
                                                            input_keys=[
