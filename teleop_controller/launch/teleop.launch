@@ -1,0 +1,8 @@
+<launch>
+    <node respawn = "true" pkg = "joy" type = "joy_node" name = "joy">
+        <param name = "dev" type = "string" value = "/dev/input/js0"/>
+        <param name = "autorepeat_rate" value = "10" />
+    </node>
+    <node pkg = "TeleopInterface" name = "TeleopInterface" type = "TeleopInterface.py" output = "screen">
+    </node>
+</launch>
