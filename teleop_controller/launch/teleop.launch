@@ -1,8 +1,14 @@
 <launch>
-    <node respawn = "true" pkg = "joy" type = "joy_node" name = "joy">
+    <node respawn = "true" pkg = "joy" type = "joy_node" name = "joy1">
+        <remap from = "joy" to = "joy1"/>
         <param name = "dev" type = "string" value = "/dev/input/js0"/>
-        <param name = "autorepeat_rate" value = "10" />
+        <param name = "autorepeat_rate" value = "5"/>
     </node>
-    <node pkg = "TeleopInterface" name = "TeleopInterface" type = "TeleopInterface.py" output = "screen">
+    <node respawn = "true" pkg = "joy" type = "joy_node" name = "joy2">
+        <remap from = "joy" to = "joy2"/>
+        <param name = "dev" type = "string" value = "/dev/input/js1"/>
+        <param name = "autorepeat_rate" value = "5"/>
+    </node>
+    <node pkg = "teleop_controller" name = "teleop_controller" type = "TeleopInterface.py" output = "screen">
     </node>
 </launch>

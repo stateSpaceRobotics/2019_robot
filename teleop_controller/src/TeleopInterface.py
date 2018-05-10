@@ -3,6 +3,8 @@ import socket
 import rospy
 import math
 from sensor_msgs.msg import Joy
+from time import sleep
+from random import gauss
 
 #Wrapper class for the UDP Socket
 class UDP_Handler:
@@ -21,14 +23,27 @@ class RobotInterface:
 
     #Static variables for robot selection
     interface_count = 0
-    controller_interface_select = 0
-    controller_interface_select_toggle_time = 0
+    controller1_interface_select = 0
+    controller2_interface_select = 1
+    controller1_interface_select_toggle_time = 0
+    controller2_interface_select_toggle_time = 0
+    artificial_delay_enabled = False
+
+    controller1_outstring = ""
+    controller2_outstring = ""
+
+    controller1_outstring_changed = True
+    controller2_outstring_changed = True
 
     def __init__(self, ip):
 
         #Dictionaries for Controller State array accessing
-        self.buttons = { "A" : 0, "B" : 1, "X" : 2, "Y" : 3, "LB" : 4, "RB" : 5, "BACK" : 6, "START" : 7, "POWER" : 8, "L3" : 9, "R3" : 10 }
-        self.axes = { "LS_LEFT_RIGHT" : 0, "LS_UP_DOWN" : 1, "LT" : 2, "RS_LEFT_RIGHT" : 3, "RS_UP_DOWN" : 4, "RT" : 5, "DPAD_LEFT_RIGHT" : 6, "DPAD_UP_DOWN" : 7 }
+        self.buttons =  { "A" : 0, "B" : 1, "X" : 2, "Y" : 3, "LB" : 4, "RB" : 5, "BACK" : 6, "START" : 7, "POWER" : 8, "L3" : 9, "R3" : 10 }
+        self.axes =     { "LS_LEFT_RIGHT" : 0, "LS_UP_DOWN" : 1, "LT" : 2, "RS_LEFT_RIGHT" : 3, "RS_UP_DOWN" : 4, "RT" : 5, "DPAD_LEFT_RIGHT" : 6, "DPAD_UP_DOWN" : 7 }
+
+        #values for gaussian sampling for artificial latency
+        self.mu = 0.5
+        self.sigma = 0.5
 
         #Motor Indices on embedded side
         self.FRONT_LEFT_DRIVE = 1
@@ -48,9 +63,13 @@ class RobotInterface:
         self.SENSOR_TOWER_TOP_MOTOR = 11
 
         rospy.init_node('listener', anonymous = True)
-        rospy.Subscriber("/joy", Joy, self.controllerCallback)
+        rospy.Subscriber("/joy1", Joy, self.controllerCallback1)
 
-        RobotInterface.controller_interface_select_toggle_time = rospy.Time.now()
+        rospy.init_node('listener', anonymous = True)
+        rospy.Subscriber("/joy2", Joy, self.controllerCallback2)
+
+        RobotInterface.controller1_interface_select_toggle_time = rospy.Time.now()
+        RobotInterface.controller2_interface_select_toggle_time = rospy.Time.now()
 
         #Motor set point UDP device
         self.set_point = UDP_Handler(ip, 3233)
@@ -58,7 +77,13 @@ class RobotInterface:
         #self.motor_state = UDP_Handler(ip, rospy.get_param("motor_state_port"))
         #self.tuning_gains = UDP_Handler(ip, rospy.get_param("tuning_gains_port"))
 
-    def controllerCallback(self, controller_state):
+    def controllerCallback1(self, controller_state):
+        self.handleControllerCallback(controller_state, 1)
+
+    def controllerCallback2(self, controller_state):
+        self.handleControllerCallback(controller_state, 2)
+
+    def handleControllerCallback(self, controller_state, controller_id):
         pass
 
 
@@ -98,18 +123,20 @@ class DiggerInterface(RobotInterface):
         self.__actuator_increment_value = 171.0
 
         #Values for bucket motor value calculation
-        self.__bucket_motor_midpoint = 511.0
-        self.__bucket_motor_regolith_speed = 85.0
-        self.__bucket_motor_gravel_speed = 45.0
-        self.__bucket_motor_increment_value = self.__bucket_motor_regolith_speed
+        self.__bucket_motor_midpoint = 511.0 #0
+        self.__bucket_motor_speed = 85.0 #math.pi
+        self.__bucket_motor_increment_value = 5.0
+        self.__bucket_motor_max_speed = 171.0
+        self.__bucket_motor_min_speed = 0
 
         #Values for conveyor motor value calculation
         self.__conveyor_motor_midpoint = 511.0
         self.__conveyor_motor_increment_value = 171.0
         self.__conveyor_direction = 1
 
+
     #Callback override for the Joy controller Topic
-    def controllerCallback(self, controller_state):
+    def handleControllerCallback(self, controller_state, controller_id):
 
         #Handle conveyor sifting even if we're not currently controlling the digger
         if self.__is_sifting:
@@ -121,33 +148,73 @@ class DiggerInterface(RobotInterface):
                 self.set_point.sendMessage(message)
                 self.__sifting_toggle_direction_time = rospy.Time.now()
 
-        #If we're not currently trying to control this robot just return
-        if self.__my_selector != RobotInterface.controller_interface_select:
-            return
+        #If we're not currently trying to control this robot just return       
+        if controller_id == 1: 
+            if self.__my_selector != RobotInterface.controller1_interface_select:
+                return
+        else:
+            if self.__my_selector != RobotInterface.controller2_interface_select:
+                return
 
         #Change currently selected robot
         if controller_state.buttons[self.buttons["BACK"]]:
-            duration = rospy.Time.now() - RobotInterface.controller_interface_select_toggle_time
+            if controller_id == 1:
+                duration = rospy.Time.now() - RobotInterface.controller1_interface_select_toggle_time
 
-            if duration.to_sec() > 1:
-                RobotInterface.controller_interface_select += 1
+                if duration.to_sec() > 1:
+                    RobotInterface.controller1_interface_select += 1
+                        
+                    RobotInterface.controller1_interface_select = RobotInterface.controller1_interface_select % (RobotInterface.interface_count)
 
-                if RobotInterface.controller_interface_select >= RobotInterface.interface_count:
-                    RobotInterface.controller_interface_select = 0
+                    if RobotInterface.controller1_interface_select == RobotInterface.controller2_interface_select:
+                        RobotInterface.controller1_interface_select += 1
 
-                RobotInterface.controller_interface_select_toggle_time = rospy.Time.now()
+                    RobotInterface.controller1_interface_select = RobotInterface.controller1_interface_select % (RobotInterface.interface_count)
 
-        #Handle changing of bucket speed for regolith/gravel
+                    RobotInterface.controller1_interface_select_toggle_time = rospy.Time.now()
+
+                    RobotInterface.controller1_outstring_changed = True
+
+            else:
+                duration = rospy.Time.now() - RobotInterface.controller2_interface_select_toggle_time
+
+                if duration.to_sec() > 1:
+                    RobotInterface.controller2_interface_select += 1
+
+                    RobotInterface.controller2_interface_select = RobotInterface.controller2_interface_select % (RobotInterface.interface_count)
+
+                    if RobotInterface.controller2_interface_select == RobotInterface.controller1_interface_select:
+                        RobotInterface.controller2_interface_select += 1
+
+                    RobotInterface.controller2_interface_select = RobotInterface.controller2_interface_select % (RobotInterface.interface_count)
+
+                    RobotInterface.controller2_interface_select_toggle_time = rospy.Time.now()
+
+                    RobotInterface.controller2_outstring_changed = True
+
+            return
+
+        #Handle changing of bucket speed
         if controller_state.axes[self.axes["DPAD_LEFT_RIGHT"]] != 0:
             duration = rospy.Time.now() - self.__dig_speed_toggle_time
 
-            if duration.to_sec() > 1:
+            if duration.to_sec() > 0.250:
                 if controller_state.axes[self.axes["DPAD_LEFT_RIGHT"]] == -1:
-                    self.__bucket_motor_increment_value = self.__bucket_motor_regolith_speed
+                    self.__bucket_motor_speed += self.__bucket_motor_increment_value
+                    if self.__bucket_motor_speed > self.__bucket_motor_max_speed:
+                        self.__bucket_motor_speed = self.__bucket_motor_max_speed
+
                 else:
-                    self.__bucket_motor_increment_value = self.__bucket_motor_gravel_speed
+                    self.__bucket_motor_speed -= self.__bucket_motor_increment_value
+                    if self.__bucket_motor_speed < self.__bucket_motor_min_speed:
+                        self.__bucket_motor_speed = self.__bucket_motor_min_speed
                 
                 self.__dig_speed_toggle_time = rospy.Time.now()
+
+                if controller_id == 1:
+                    RobotInterface.controller1_outstring_changed = True
+                else:
+                    RobotInterface.controller2_outstring_changed = True
 
         #Activate the bucket ladder
         if controller_state.buttons[self.buttons["X"]]:
@@ -194,12 +261,30 @@ class DiggerInterface(RobotInterface):
                 self.__sifting_toggle_time = rospy.Time.now()
 
         #Output Info
-        rospy.loginfo("Selected Robot: " + str(self.__my_name) + "\n")
-        rospy.loginfo("Is Digging: " + str(self.__is_digging) + "\n")
-        rospy.loginfo("Is Conveying: " + str(self.__is_conveying) + "\n")
-        rospy.loginfo("Is Sifting: " + str(self.__is_sifting) + "\n")
-        rospy.loginfo("Front Actuators Inversion: " + str(self.__front_actuator_inversion) + "\n")
-        rospy.loginfo("Back Actuators Inversion: " + str(self.__back_actuator_inversion) + "\n")
+        #rospy.loginfo("Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name))
+        #rospy.loginfo("Is Digging: " + str(self.__is_digging))
+        #rospy.loginfo("Is Conveying: " + str(self.__is_conveying))
+        #rospy.loginfo("Is Sifting: " + str(self.__is_sifting))
+        #rospy.loginfo("Front Actuators Inversion: " + str(self.__front_actuator_inversion))
+        #rospy.loginfo("Back Actuators Inversion: " + str(self.__back_actuator_inversion))
+
+        for button in controller_state.buttons:
+            if button:
+                if controller_id == 1:
+                    RobotInterface.controller1_outstring_changed = True
+                else:
+                    RobotInterface.controller2_outstring_changed = True
+
+        if controller_id == 1:
+            if RobotInterface.controller1_outstring_changed:
+                RobotInterface.controller1_outstring_changed = False
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nIs Digging: " + str(self.__is_digging) + "\nIs Conveying: " + str(self.__is_conveying) + "\nIs Sifting: " + str(self.__is_sifting) + "\nFront Actuators Inversion: " + str(self.__front_actuator_inversion) + "\nBack Actuators Inversion: " + str(self.__back_actuator_inversion) + "\nCurrent Digging Speed: " + str(self.__bucket_motor_midpoint - self.__bucket_motor_speed * self.__is_digging)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+        else:
+            if RobotInterface.controller2_outstring_changed:
+                RobotInterface.controller2_outstring_changed = False
+               RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nIs Digging: " + str(self.__is_digging) + "\nIs Conveying: " + str(self.__is_conveying) + "\nIs Sifting: " + str(self.__is_sifting) + "\nFront Actuators Inversion: " + str(self.__front_actuator_inversion) + "\nBack Actuators Inversion: " + str(self.__back_actuator_inversion) + "\nCurrent Digging Speed: " + str(self.__bucket_motor_midpoint - self.__bucket_motor_speed * self.__is_digging)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
 
         #Build the message to send over UDP
         message = str(self.FRONT_LEFT_DRIVE) + "," + str(self.__drive_motor_midpoint - self.__drive_motor_increment_value * controller_state.axes[self.axes["LS_UP_DOWN"]]) + "\n"
@@ -212,12 +297,16 @@ class DiggerInterface(RobotInterface):
         message += str(self.BACK_LEFT_ACTUATOR) + "," + str(self.__actuator_midpoint + self.__actuator_increment_value * ((controller_state.axes[self.axes["RT"]] - 1) / -2) * self.__back_actuator_inversion) + "\n"
         message += str(self.BACK_RIGHT_ACTUATOR) + "," + str(self.__actuator_midpoint + self.__actuator_increment_value * ((controller_state.axes[self.axes["RT"]] - 1) / -2) * self.__back_actuator_inversion) + "\n"
 
-        message += str(self.BUCKET_MOTOR) + "," + str(self.__bucket_motor_midpoint - self.__bucket_motor_increment_value * self.__is_digging) + "\n"
+        message += str(self.BUCKET_MOTOR) + "," + str(self.__bucket_motor_midpoint - self.__bucket_motor_speed * self.__is_digging) + "\n"
         message += str(self.CONVEYOR_MOTOR) + "," + str(self.__conveyor_motor_midpoint + self.__conveyor_motor_increment_value * self.__is_conveying * self.__conveyor_direction) + "\n"
 
-        rospy.loginfo("\n\nmessage:\n" + message)
+        if RobotInterface.artificial_delay_enabled:
+            delay = gauss(self.mu, self.sigma)
+            sleep(delay)
 
-        self.set_point.sendMessage(message)
+        #rospy.loginfo("\nmessage:\n" + message)
+
+        #self.set_point.sendMessage(message)
 
 
 #Inherited class for the Sensor Tower
@@ -229,34 +318,83 @@ class DumperInterface(RobotInterface):
         self.__my_selector = RobotInterface.interface_count
         RobotInterface.interface_count += 1
 
+        #Values for drive motor value calculation
         self.__drive_motor_midpoint = 511.0
         self.__drive_motor_increment_value = 171.0
 
+        #Values for arm motor value calculations
         self.__arm_motors_midpoint = 511.0
         self.__arm_base_motor_increment_value = 171.0
         self.__arm_top_motor_increment_value = 171.0
 
     #Callback override for the Joy controller Topic
-    def controllerCallback(self, controller_state):
+    def handleControllerCallback(self, controller_state, controller_id):
 
-        #If we're not currently trying to control this robot just return
-        if self.__my_selector != RobotInterface.controller_interface_select:
-           return
+        #If we're not currently trying to control this robot just return       
+        if controller_id == 1: 
+            if self.__my_selector != RobotInterface.controller1_interface_select:
+                return
+        else:
+            if self.__my_selector != RobotInterface.controller2_interface_select:
+                return
 
         #Change currently selected robot
         if controller_state.buttons[self.buttons["BACK"]]:
-            duration = rospy.Time.now() - RobotInterface.controller_interface_select_toggle_time
+            if controller_id == 1:
+                duration = rospy.Time.now() - RobotInterface.controller1_interface_select_toggle_time
 
-            if duration.to_sec() > 1:
-                RobotInterface.controller_interface_select += 1
+                if duration.to_sec() > 1:
+                    RobotInterface.controller1_interface_select += 1
+                        
+                    RobotInterface.controller1_interface_select = RobotInterface.controller1_interface_select % (RobotInterface.interface_count)
 
-                if RobotInterface.controller_interface_select >= RobotInterface.interface_count:
-                    RobotInterface.controller_interface_select = 0
+                    if RobotInterface.controller1_interface_select == RobotInterface.controller2_interface_select:
+                        RobotInterface.controller1_interface_select += 1
 
-                RobotInterface.controller_interface_select_toggle_time = rospy.Time.now()
+                    RobotInterface.controller1_interface_select = RobotInterface.controller1_interface_select % (RobotInterface.interface_count)
+
+                    RobotInterface.controller1_interface_select_toggle_time = rospy.Time.now()
+
+                    RobotInterface.controller1_outstring_changed = True
+
+            else:
+                duration = rospy.Time.now() - RobotInterface.controller2_interface_select_toggle_time
+
+                if duration.to_sec() > 1:
+                    RobotInterface.controller2_interface_select += 1
+
+                    RobotInterface.controller2_interface_select = RobotInterface.controller2_interface_select % (RobotInterface.interface_count)
+
+                    if RobotInterface.controller2_interface_select == RobotInterface.controller1_interface_select:
+                        RobotInterface.controller2_interface_select += 1
+
+                    RobotInterface.controller2_interface_select = RobotInterface.controller2_interface_select % (RobotInterface.interface_count)
+
+                    RobotInterface.controller2_interface_select_toggle_time = rospy.Time.now()
+
+                    RobotInterface.controller2_outstring_changed = True
+
+            return
                 
+        for button in controller_state.buttons:
+            if button:
+                if controller_id == 1:
+                    RobotInterface.controller1_outstring_changed = True
+                else:
+                    RobotInterface.controller2_outstring_changed = True
 
-        rospy.loginfo("Selected Robot: " + str(self.__my_name))
+        if controller_id == 1:
+            if RobotInterface.controller1_outstring_changed:
+                RobotInterface.controller1_outstring_changed = False
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+        else:
+            if RobotInterface.controller2_outstring_changed:
+                RobotInterface.controller2_outstring_changed = False
+                RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+
+        #rospy.loginfo("Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name))
 
         #Build the message to send over UDP
         message = str(self.FRONT_LEFT_DRIVE) + "," + str(self.__drive_motor_midpoint - self.__drive_motor_increment_value * controller_state.axes[self.axes["LS_UP_DOWN"]]) + "\n"
@@ -267,7 +405,11 @@ class DumperInterface(RobotInterface):
         message += str(self.SENSOR_TOWER_BASE_MOTOR) + "," + str(self.__arm_motors_midpoint + self.__arm_base_motor_increment_value * controller_state.axes[self.axes["RT"]]) + "\n"
         message += str(self.SENSOR_TOWER_TOP_MOTOR) + "," + str(self.__arm_motors_midpoint + self.__arm_top_motor_increment_value * controller_state.axes[self.axes["LT"]]) + "\n"
 
-        rospy.loginfo("\n\nmessage:\n" + message)
+        if RobotInterface.artificial_delay_enabled:
+            delay = gauss(self.mu, self.sigma)
+            sleep(delay)
+
+        #rospy.loginfo("\nmessage:\n" + message)
 
         #self.set_point.sendMessage(message)
 
@@ -286,26 +428,74 @@ class TransporterInterface(RobotInterface):
         self.__drive_motor_increment_value = 171.0
 
     #Callback override for the Joy controller Topic
-    def controllerCallback(self, controller_state):
+    def handleControllerCallback(self, controller_state, controller_id):
         
-        #If we're not currently trying to control this robot just return
-        if self.__my_selector != RobotInterface.controller_interface_select:
-           return
+        #If we're not currently trying to control this robot just return       
+        if controller_id == 1: 
+            if self.__my_selector != RobotInterface.controller1_interface_select:
+                return
+        else:
+            if self.__my_selector != RobotInterface.controller2_interface_select:
+                return
 
         #Change currently selected robot
         if controller_state.buttons[self.buttons["BACK"]]:
-            duration = rospy.Time.now() - RobotInterface.controller_interface_select_toggle_time
+            if controller_id == 1:
+                duration = rospy.Time.now() - RobotInterface.controller1_interface_select_toggle_time
 
-            if duration.to_sec() > 1:
-                RobotInterface.controller_interface_select += 1
+                if duration.to_sec() > 1:
+                    RobotInterface.controller1_interface_select += 1
+                        
+                    RobotInterface.controller1_interface_select = RobotInterface.controller1_interface_select % (RobotInterface.interface_count)
 
-                if RobotInterface.controller_interface_select >= RobotInterface.interface_count:
-                    RobotInterface.controller_interface_select = 0
+                    if RobotInterface.controller1_interface_select == RobotInterface.controller2_interface_select:
+                        RobotInterface.controller1_interface_select += 1
 
-                RobotInterface.controller_interface_select_toggle_time = rospy.Time.now()
+                    RobotInterface.controller1_interface_select = RobotInterface.controller1_interface_select % (RobotInterface.interface_count)
+
+                    RobotInterface.controller1_interface_select_toggle_time = rospy.Time.now()
+
+                    RobotInterface.controller1_outstring_changed = True
+
+            else:
+                duration = rospy.Time.now() - RobotInterface.controller2_interface_select_toggle_time
+
+                if duration.to_sec() > 1:
+                    RobotInterface.controller2_interface_select += 1
+
+                    RobotInterface.controller2_interface_select = RobotInterface.controller2_interface_select % (RobotInterface.interface_count)
+
+                    if RobotInterface.controller2_interface_select == RobotInterface.controller1_interface_select:
+                        RobotInterface.controller2_interface_select += 1
+
+                    RobotInterface.controller2_interface_select = RobotInterface.controller2_interface_select % (RobotInterface.interface_count)
+
+                    RobotInterface.controller2_interface_select_toggle_time = rospy.Time.now()
+
+                    RobotInterface.controller2_outstring_changed = True
+
+            return
                 
 
-        rospy.loginfo("Selected Robot: " + str(self.__my_name) + "\n")
+        for button in controller_state.buttons:
+            if button:
+                if controller_id == 1:
+                    RobotInterface.controller1_outstring_changed = True
+                else:
+                    RobotInterface.controller2_outstring_changed = True
+
+        if controller_id == 1:
+            if RobotInterface.controller1_outstring_changed:
+                RobotInterface.controller1_outstring_changed = False
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+        else:
+            if RobotInterface.controller2_outstring_changed:
+                RobotInterface.controller2_outstring_changed = False
+                RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+
+        #rospy.loginfo("Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name))
 
         #Build the message to send over UDP
         message = str(self.FRONT_LEFT_DRIVE) + "," + str(self.__drive_motor_midpoint - self.__drive_motor_increment_value * controller_state.axes[self.axes["LS_UP_DOWN"]]) + "\n"
@@ -313,15 +503,22 @@ class TransporterInterface(RobotInterface):
         message += str(self.FRONT_RIGHT_DRIVE) + "," + str(self.__drive_motor_midpoint + self.__drive_motor_increment_value * controller_state.axes[self.axes["RS_UP_DOWN"]]) + "\n"
         message += str(self.BACK_RIGHT_DRIVE) + "," + str(self.__drive_motor_midpoint + self.__drive_motor_increment_value * controller_state.axes[self.axes["RS_UP_DOWN"]]) + "\n"
 
-        rospy.loginfo("\n\nmessage:\n" + message)
+        if RobotInterface.artificial_delay_enabled:
+            delay = gauss(self.mu, self.sigma)
+            sleep(delay)
+
+        #rospy.loginfo("\nmessage:\n" + message)
 
         #self.set_point.sendMessage(message)
 
 
 def main():
+
+    #RobotInterface.artificial_delay_enabled = True
+
     minibot = TransporterInterface("ip")
-    digger = DiggerInterface("192.168.0.101")
     sensorTower = DumperInterface("ip")
+    digger = DiggerInterface("192.168.0.100")
 
     rospy.spin()
 
