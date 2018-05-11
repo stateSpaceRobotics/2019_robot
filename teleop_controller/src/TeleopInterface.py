@@ -283,7 +283,7 @@ class DiggerInterface(RobotInterface):
         else:
             if RobotInterface.controller2_outstring_changed:
                 RobotInterface.controller2_outstring_changed = False
-               RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nIs Digging: " + str(self.__is_digging) + "\nIs Conveying: " + str(self.__is_conveying) + "\nIs Sifting: " + str(self.__is_sifting) + "\nFront Actuators Inversion: " + str(self.__front_actuator_inversion) + "\nBack Actuators Inversion: " + str(self.__back_actuator_inversion) + "\nCurrent Digging Speed: " + str(self.__bucket_motor_midpoint - self.__bucket_motor_speed * self.__is_digging)
+                RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nIs Digging: " + str(self.__is_digging) + "\nIs Conveying: " + str(self.__is_conveying) + "\nIs Sifting: " + str(self.__is_sifting) + "\nFront Actuators Inversion: " + str(self.__front_actuator_inversion) + "\nBack Actuators Inversion: " + str(self.__back_actuator_inversion) + "\nCurrent Digging Speed: " + str(self.__bucket_motor_midpoint - self.__bucket_motor_speed * self.__is_digging)
                 rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
 
         #Build the message to send over UDP
