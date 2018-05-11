@@ -323,9 +323,15 @@ class DumperInterface(RobotInterface):
         self.__drive_motor_increment_value = 171.0
 
         #Values for arm motor value calculations
-        self.__arm_motors_midpoint = 511.0
-        self.__arm_base_motor_increment_value = 171.0
-        self.__arm_top_motor_increment_value = 171.0
+        self.__arm_motors_base = 0
+        self.__base_arm_inversion = 1
+        self.__top_arm_inversion = 1
+        self.__arm_motors_top = 0
+        self.__arm_motors_base_max = 140
+        self.__arm_motors_top_max = 100
+        self.__arm_reflection = 120
+        self.__top_arm_toggle = rospy.Time.now()
+        self.__base_arm_toggle = rospy.Time.now()
 
     #Callback override for the Joy controller Topic
     def handleControllerCallback(self, controller_state, controller_id):
@@ -393,6 +399,39 @@ class DumperInterface(RobotInterface):
                 RobotInterface.controller2_outstring_changed = False
                 RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
                 rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+        
+        if controller_state.axes[self.axes["LT"]]==-1:
+            self.__arm_motors_base+=5*self.__base_arm_inversion
+            if self.__arm_motors_base > self.__arm_motors_base_max:
+                self.__arm_motors_base=self.__arm_motors_base_max
+            elif self.__arm_motors_base < 0:
+                self.__arm_motors_base=0
+            else:
+                if (self.__arm_motors_base <= self.__arm_reflection and self.__base_arm_inversion==1) or (self.__base_arm_inversion==-1 and self.__arm_motors_base<self.__arm_reflection):
+                    self.__arm_motors_top+=5*self.__base_arm_inversion*-1
+                else:
+                    self.__arm_motors_top+=5*self.__base_arm_inversion
+        
+        if controller_state.axes[self.axes["RT"]]==-1:
+            self.__arm_motors_top+=5*self.__top_arm_inversion
+            if self.__arm_motors_top > self.__arm_motors_top_max:
+                self.__arm_motors_top=self.__arm_motors_top_max
+            if self.__arm_motors_top<0:
+                self.__arm_motors_top=0
+        
+        if controller_state.buttons[self.buttons["LB"]]:
+            duration = rospy.Time.now() - self.__base_arm_toggle
+
+            if duration.to_sec() > 1:
+                self.__base_arm_inversion= self.__base_arm_inversion*-1
+                self.__base_arm_toggle=rospy.Time.now()
+
+        if controller_state.buttons[self.buttons["RB"]]:
+            duration = rospy.Time.now() - self.__top_arm_toggle
+
+            if duration.to_sec() > 1:
+                self.__top_arm_inversion= self.__top_arm_inversion*-1
+                self.__top_arm_toggle=rospy.Time.now()
 
         #rospy.loginfo("Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name))
 
@@ -402,8 +441,8 @@ class DumperInterface(RobotInterface):
         message += str(self.FRONT_RIGHT_DRIVE) + "," + str(self.__drive_motor_midpoint + self.__drive_motor_increment_value * controller_state.axes[self.axes["RS_UP_DOWN"]]) + "\n"
         message += str(self.BACK_RIGHT_DRIVE) + "," + str(self.__drive_motor_midpoint + self.__drive_motor_increment_value * controller_state.axes[self.axes["RS_UP_DOWN"]]) + "\n"
 
-        message += str(self.SENSOR_TOWER_BASE_MOTOR) + "," + str(self.__arm_motors_midpoint + self.__arm_base_motor_increment_value * controller_state.axes[self.axes["RT"]]) + "\n"
-        message += str(self.SENSOR_TOWER_TOP_MOTOR) + "," + str(self.__arm_motors_midpoint + self.__arm_top_motor_increment_value * controller_state.axes[self.axes["LT"]]) + "\n"
+        message += str(self.SENSOR_TOWER_BASE_MOTOR) + "," + str(self.__arm_motors_base) + "\n"
+        message += str(self.SENSOR_TOWER_TOP_MOTOR) + "," + str(self.__arm_motors_top) + "\n"
 
         if RobotInterface.artificial_delay_enabled:
             delay = gauss(self.mu, self.sigma)
