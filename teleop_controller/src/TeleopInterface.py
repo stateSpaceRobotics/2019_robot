@@ -96,6 +96,20 @@ class DiggerInterface(RobotInterface):
         self.__my_selector = RobotInterface.interface_count
         RobotInterface.interface_count += 1
 
+        #Motor Indices on embedded side
+        self.FRONT_LEFT_DRIVE = 1
+        self.FRONT_RIGHT_DRIVE = 9
+        self.BACK_RIGHT_DRIVE = 0
+        self.BACK_LEFT_DRIVE = 8
+
+        self.FRONT_LEFT_ACTUATOR = 6
+        self.FRONT_RIGHT_ACTUATOR = 7
+        self.BACK_LEFT_ACTUATOR = 5
+        self.BACK_RIGHT_ACTUATOR = 4
+
+        self.BUCKET_MOTOR = 2
+        self.CONVEYOR_MOTOR = 3
+
         #Flags for toggles
         self.__is_digging = False
         self.__is_conveying = False
@@ -297,6 +311,7 @@ class DiggerInterface(RobotInterface):
         message += str(self.BACK_LEFT_ACTUATOR) + "," + str(self.__actuator_midpoint + self.__actuator_increment_value * ((controller_state.axes[self.axes["RT"]] - 1) / -2) * self.__back_actuator_inversion) + "\n"
         message += str(self.BACK_RIGHT_ACTUATOR) + "," + str(self.__actuator_midpoint + self.__actuator_increment_value * ((controller_state.axes[self.axes["RT"]] - 1) / -2) * self.__back_actuator_inversion) + "\n"
 
+
         message += str(self.BUCKET_MOTOR) + "," + str(self.__bucket_motor_midpoint - self.__bucket_motor_speed * self.__is_digging) + "\n"
         message += str(self.CONVEYOR_MOTOR) + "," + str(self.__conveyor_motor_midpoint + self.__conveyor_motor_increment_value * self.__is_conveying * self.__conveyor_direction) + "\n"
 
@@ -318,6 +333,15 @@ class DumperInterface(RobotInterface):
         self.__my_selector = RobotInterface.interface_count
         RobotInterface.interface_count += 1
 
+        #Motor Indices on embedded side
+        self.FRONT_LEFT_DRIVE = 0
+        self.FRONT_RIGHT_DRIVE = 1
+        self.BACK_RIGHT_DRIVE = 2
+        self.BACK_LEFT_DRIVE = 3
+
+        self.SENSOR_TOWER_BASE_MOTOR = 4
+        self.SENSOR_TOWER_TOP_MOTOR = 5
+
         #Values for drive motor value calculation
         self.__drive_motor_midpoint = 511.0
         self.__drive_motor_increment_value = 171.0
@@ -327,9 +351,9 @@ class DumperInterface(RobotInterface):
         self.__base_arm_inversion = 1
         self.__top_arm_inversion = 1
         self.__arm_motors_top = 0
-        self.__arm_motors_base_max = 140
-        self.__arm_motors_top_max = 100
-        self.__arm_reflection = 120
+        self.__arm_motors_base_max = -140 * (math.pi/180)
+        self.__arm_motors_top_max = 100 * (math.pi/180)
+        self.__arm_reflection = 120 * (math.pi/180)
         self.__top_arm_toggle = rospy.Time.now()
         self.__base_arm_toggle = rospy.Time.now()
 
@@ -401,19 +425,19 @@ class DumperInterface(RobotInterface):
                 rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
         
         if controller_state.axes[self.axes["LT"]]==-1:
-            self.__arm_motors_base+=5*self.__base_arm_inversion
+            self.__arm_motors_base+=-5*self.__base_arm_inversion * (math.pi/180)
             if self.__arm_motors_base > self.__arm_motors_base_max:
                 self.__arm_motors_base=self.__arm_motors_base_max
             elif self.__arm_motors_base < 0:
                 self.__arm_motors_base=0
             else:
                 if (self.__arm_motors_base <= self.__arm_reflection and self.__base_arm_inversion==1) or (self.__base_arm_inversion==-1 and self.__arm_motors_base<self.__arm_reflection):
-                    self.__arm_motors_top+=5*self.__base_arm_inversion*-1
+                    self.__arm_motors_top+=5*self.__base_arm_inversion*-1 * (math.pi/180)
                 else:
-                    self.__arm_motors_top+=5*self.__base_arm_inversion
+                    self.__arm_motors_top+=5*self.__base_arm_inversion * (math.pi/180)
         
         if controller_state.axes[self.axes["RT"]]==-1:
-            self.__arm_motors_top+=5*self.__top_arm_inversion
+            self.__arm_motors_top+=5*self.__top_arm_inversion * (math.pi/180)
             if self.__arm_motors_top > self.__arm_motors_top_max:
                 self.__arm_motors_top=self.__arm_motors_top_max
             if self.__arm_motors_top<0:
@@ -450,7 +474,7 @@ class DumperInterface(RobotInterface):
 
         #rospy.loginfo("\nmessage:\n" + message)
 
-        #self.set_point.sendMessage(message)
+        self.set_point.sendMessage(message)
 
 
 #Inherited class for the minibot
@@ -461,6 +485,12 @@ class TransporterInterface(RobotInterface):
         self.__my_name = "Mini Bot"
         self.__my_selector = RobotInterface.interface_count
         RobotInterface.interface_count += 1
+
+        #Motor Indices on embedded side
+        self.FRONT_LEFT_DRIVE = 1
+        self.FRONT_RIGHT_DRIVE = 9
+        self.BACK_RIGHT_DRIVE = 0
+        self.BACK_LEFT_DRIVE = 8
 
         #Values for drive motor value calculation
         self.__drive_motor_midpoint = 511.0
@@ -555,8 +585,9 @@ def main():
 
     #RobotInterface.artificial_delay_enabled = True
 
+    
+    sensorTower = DumperInterface("192.168.0.101")
     minibot = TransporterInterface("ip")
-    sensorTower = DumperInterface("ip")
     digger = DiggerInterface("192.168.0.100")
 
     rospy.spin()
