@@ -321,7 +321,7 @@ class DiggerInterface(RobotInterface):
 
         #rospy.loginfo("\nmessage:\n" + message)
 
-        #self.set_point.sendMessage(message)
+        self.set_point.sendMessage(message)
 
 
 #Inherited class for the Sensor Tower
@@ -405,25 +405,7 @@ class DumperInterface(RobotInterface):
                     RobotInterface.controller2_outstring_changed = True
 
             return
-                
-        for button in controller_state.buttons:
-            if button:
-                if controller_id == 1:
-                    RobotInterface.controller1_outstring_changed = True
-                else:
-                    RobotInterface.controller2_outstring_changed = True
 
-        if controller_id == 1:
-            if RobotInterface.controller1_outstring_changed:
-                RobotInterface.controller1_outstring_changed = False
-                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
-                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
-        else:
-            if RobotInterface.controller2_outstring_changed:
-                RobotInterface.controller2_outstring_changed = False
-                RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
-                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
-        
         if controller_state.axes[self.axes["LT"]]==-1:
             self.__arm_motors_base+=-5*self.__base_arm_inversion * (math.pi/180)
             if self.__arm_motors_base > self.__arm_motors_base_max:
@@ -457,6 +439,26 @@ class DumperInterface(RobotInterface):
                 self.__top_arm_inversion= self.__top_arm_inversion*-1
                 self.__top_arm_toggle=rospy.Time.now()
 
+                
+        for button in controller_state.buttons:
+            if button:
+                if controller_id == 1:
+                    RobotInterface.controller1_outstring_changed = True
+                else:
+                    RobotInterface.controller2_outstring_changed = True
+
+
+        if controller_id == 1:
+            if RobotInterface.controller1_outstring_changed:
+                RobotInterface.controller1_outstring_changed = False
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nBase Arm Inversion: " + str(self.__base_arm_inversion) + "\nTop Arm Inversion: " + str(self.__top_arm_inversion)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+        else:
+            if RobotInterface.controller2_outstring_changed:
+                RobotInterface.controller2_outstring_changed = False
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nBase Arm Inversion: " + str(self.__base_arm_inversion) + "\nTop Arm Inversion: " + str(self.__top_arm_inversion)
+                rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
+
         #rospy.loginfo("Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name))
 
         #Build the message to send over UDP
@@ -474,7 +476,7 @@ class DumperInterface(RobotInterface):
 
         #rospy.loginfo("\nmessage:\n" + message)
 
-        self.set_point.sendMessage(message)
+        #self.set_point.sendMessage(message)
 
 
 #Inherited class for the minibot
@@ -487,14 +489,15 @@ class TransporterInterface(RobotInterface):
         RobotInterface.interface_count += 1
 
         #Motor Indices on embedded side
-        self.FRONT_LEFT_DRIVE = 1
-        self.FRONT_RIGHT_DRIVE = 9
-        self.BACK_RIGHT_DRIVE = 0
-        self.BACK_LEFT_DRIVE = 8
+        self.FRONT_LEFT_DRIVE = 0
+        self.FRONT_RIGHT_DRIVE = 1
+        self.BACK_RIGHT_DRIVE = 2
+        self.BACK_LEFT_DRIVE = 3
 
         #Values for drive motor value calculation
-        self.__drive_motor_midpoint = 511.0
-        self.__drive_motor_increment_value = 171.0
+        self.__drive_motor_midpoint = 0
+        self.__drive_motor_increment_value = 2 * math.pi
+        self.__drive_motor_max_fraction = 1.0
 
     #Callback override for the Joy controller Topic
     def handleControllerCallback(self, controller_state, controller_id):
@@ -545,6 +548,12 @@ class TransporterInterface(RobotInterface):
 
             return
                 
+        if controller_state.buttons[self.buttons["B"]]:
+            if self.__drive_motor_max_fraction == 1.0:
+                self.__drive_motor_max_fraction = 0.5
+            else:
+                self.__drive_motor_max_fraction = 1.0
+
 
         for button in controller_state.buttons:
             if button:
@@ -556,12 +565,12 @@ class TransporterInterface(RobotInterface):
         if controller_id == 1:
             if RobotInterface.controller1_outstring_changed:
                 RobotInterface.controller1_outstring_changed = False
-                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nCurrent Max Drive Fraction: " + str(self.__drive_motor_max_fraction)
                 rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
         else:
             if RobotInterface.controller2_outstring_changed:
                 RobotInterface.controller2_outstring_changed = False
-                RobotInterface.controller2_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name)
+                RobotInterface.controller1_outstring = "Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name) + "\nCurrent Max Drive Fraction: " + str(self.__drive_motor_max_fraction)
                 rospy.loginfo("\n\n" + RobotInterface.controller1_outstring + "\n\n" + RobotInterface.controller2_outstring)
 
         #rospy.loginfo("Controller (" + str(controller_id) + ") Selected Robot: " + str(self.__my_name))
@@ -588,7 +597,7 @@ def main():
     
     sensorTower = DumperInterface("192.168.0.101")
     minibot = TransporterInterface("ip")
-    digger = DiggerInterface("192.168.0.100")
+    digger = DiggerInterface("192.168.0.104")
 
     rospy.spin()
 
