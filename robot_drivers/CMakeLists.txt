@@ -9,6 +9,7 @@ project(robot_drivers)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   actionlib
+  ros_control
   std_msgs
 )
 

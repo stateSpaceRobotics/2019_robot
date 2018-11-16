@@ -14,14 +14,14 @@ include "dumper.inc"
 include "digger.inc"
 
 # Instantiate a team of robots
-dumper( pose [1.095 0.6 0 0] name "dumper" color "green")
-digger( pose [0.94 1.11 0 0] name "digger" color "blue")
-transporter( pose [0.795 0.53 0 0] name "transporter" color "red")
+dumper( pose [1.16 0.52 0 0] name "dumper" color "green")
+digger( pose [0.84 1.33 0 0] name "digger" color "blue")
+transporter( pose [0.5 0.69 0 0] name "transporter" color "red")
 
 # Load obstacles here
 # Example:
 obstacle_sm( pose [0.80 3.15 0 0] color "black")
 obstacle_md( pose [1.49 3.94 0 0] color "black")
 obstacle_md( pose [2.12 2.00 0 0] color "black")
-obstacle_sm( pose [2.21 3.45 0 0] color "black")
-obstacle_lg( pose [2.83 2.98 0 0] color "black")
+#obstacle_sm( pose [2.21 3.45 0 0] color "black")
+#obstacle_lg( pose [2.83 2.98 0 0] color "black")
