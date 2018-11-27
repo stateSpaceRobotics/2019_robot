@@ -1,0 +1,15 @@
+global_frame: /map
+transform_tolerance: 1.0
+
+update_frequency: 5.0
+
+footprint: [[0.345, 0.335], [-0.345, 0.335], [-0.345, -0.335], [0.345, -0.335]]
+
+plugins: [
+  {name: static_layer,    type: "costmap_2d::StaticLayer"},
+  {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+]
+
+inflation_layer:
+  inflation_radius: .25
+  cost_scaling_factor: 2.5
