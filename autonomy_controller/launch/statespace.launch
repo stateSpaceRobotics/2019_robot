@@ -1,8 +1,40 @@
 <launch>
+    <arg name="multi"   default="1" />
 
-    <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch">
-    <arg name="stage_sim" value="multi_bot_obstacles.launch" />
-    </include>
+    <!-- Multi-robot -->
+    <group if="multi">
+        <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch">
+            <arg name="stage_sim" value="multi_bot_obstacles.launch" />
+            <arg name="map_file1"    default="stage_no_holes.yaml" />
+            <arg name="map_file2"    default="stage_obstacles.yaml" />
+
+            <!-- Mapping -->
+            <node pkg="map_server" type="map_server" name="map_server_1" args="$(find ssr_stage)/maps/$(arg map_file1)" respawn="false" >
+                <param name="frame_id" value="/map" />
+                <remap from="map" to="map1" />
+            </node>
+
+            <node pkg="map_server" type="map_server" name="map_server_2" args="$(find ssr_stage)/maps/$(arg map_file2)" respawn="false" >
+                <param name="frame_id" value="/map" />
+                <remap from="map" to="map2" />
+            </node>
+
+        </include>
+    </group>
+
+    <!-- Single-robot -->
+    <group unless="multi">
+        <include file="$(find multi_robot_path_planner)/launch/single_bot_stage.launch">
+            <arg name="stage_sim"   default="single_bot_empty.launch" />
+            <arg name="map_file"    default="stage_empty.yaml" />
+
+            <!-- Mapping -->
+            <node pkg="map_server" type="map_server" name="map_server" args="$(find ssr_stage)/maps/$(arg map_file)" respawn="false" >
+                <param name="frame_id" value="/map" />
+            </node>
+
+        </include>
+    </group>
 
     <node pkg="autonomy_controller" type="Total_State_Machine.py" name="state_machine" output="screen"/>
 
