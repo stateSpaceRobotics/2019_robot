@@ -1,8 +1,30 @@
 <launch>
 
-    <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch">
-    <arg name="stage_sim" value="multi_bot_obstacles.launch" />
+
+
+    <!-- Stage -->
+    <arg name="stage_sim" default="multi_bot_obstacles" />
+
+    <include file="$(find ssr_stage)/launch/$(arg stage_sim).launch"/>
+
+
+    <include file="$(find multi_robot_path_planner)/launch/multi_bot_stage.launch" if="$(eval arg('stage_sim') == 'multi_bot_obstacles')">
+    <arg name="stage_sim" default="multi_bot_obstacles.launch"/>
     </include>
+
+    <include file="$(find multi_robot_path_planner)/launch/single_bot_stage.launch" if="$(eval arg('stage_sim') == 'single_bot_empty')">
+    <arg name="stage_sim" default="single_bot_empty.launch"/>
+    </include>
+
+    <include file="$(find multi_robot_path_planner)/launch/single_bot_stage_gmapping.launch" if="$(eval arg('stage_sim') == 'single_bot_obstacles')">
+    <arg name="stage_sim" default="single_bot_obstacles.launch"/>
+    </include>
+
+
+
+
+
+
 
     <node pkg="autonomy_controller" type="Total_State_Machine.py" name="state_machine" output="screen"/>
 
