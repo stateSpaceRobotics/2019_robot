@@ -1,4 +1,5 @@
 <launch>
+    <arg name="multi"   default="1" />
 
     <!-- Stage -->
     <arg name="stage_sim" default="multi_bot_obstacles" />
