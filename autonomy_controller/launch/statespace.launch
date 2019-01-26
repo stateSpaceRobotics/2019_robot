@@ -28,7 +28,9 @@
     </group>
 
     <group if="$(eval arg('stage_sim') == 'single_bot_obstacles')">
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" />
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" >
+            <remap from="/move_base_simple/goal" to="/dumper/move_base_simple/goal" />
+        </node>
     </group>
 
 
