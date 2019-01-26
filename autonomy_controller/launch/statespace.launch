@@ -27,6 +27,10 @@
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" />
     </group>
 
+    <group if="$(eval arg('stage_sim') == 'single_bot_obstacles')">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" />
+    </group>
+
 
     <!-- Multi-robot Mapping -->
     <group if="$(eval arg('stage_sim') == 'multi_bot_obstacles')">
