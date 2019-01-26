@@ -37,8 +37,8 @@ navigation:
       base_frame: "base_link"
 
       move_base:
-        config_package: "multi_robot_path_planner"
-        config_path: "move_base_config/stage/dumper"
+        config_package: "robot_config"
+        config_path: "stage/dumper"
 
       localization:
         package: "fake_localization"
@@ -58,8 +58,8 @@ navigation:
       base_frame: "base_link"
 
       move_base:
-        config_package: "multi_robot_path_planner"
-        config_path: "move_base_config/stage/digger"
+        config_package: "robot_config"
+        config_path: "stage/digger"
 
       localization:
         package: "fake_localization"
@@ -79,8 +79,8 @@ navigation:
       base_frame: "base_link"
 
       move_base:
-        config_package: "multi_robot_path_planner"
-        config_path: "move_base_config/stage/transporter"
+        config_package: "robot_config"
+        config_path: "stage/transporter"
 
       localization:
         package: "fake_localization"
