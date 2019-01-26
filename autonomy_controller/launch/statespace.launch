@@ -17,6 +17,17 @@
         <arg name="stage_sim" default="single_bot_obstacles.launch"/>
     </include>
 
+
+    <!-- Visualization with RVIZ -->
+    <group if="$(eval arg('stage_sim') == 'multi_bot_obstacles')">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/multi_robot.rviz" />
+    </group>
+
+    <group if="$(eval arg('stage_sim') == 'single_bot_empty')">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" />
+    </group>
+
+
     <!-- Multi-robot Mapping -->
     <group if="$(eval arg('stage_sim') == 'multi_bot_obstacles')">
         <arg name="map_file1"    default="stage_no_holes.yaml" />
