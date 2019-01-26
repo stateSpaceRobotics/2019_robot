@@ -1,3 +1,5 @@
+
+
 <launch>
 	<master auto="start" />	
 	<rosparam file="$(find robot_config)/params.yaml" command="load" />
