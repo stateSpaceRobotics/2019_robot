@@ -23,7 +23,7 @@
 
     <node pkg="autonomy_controller" type="Total_State_Machine.py" name="state_machine" output="screen" />
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/multi_robot.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ssr_launchpad)/multi_robot.rviz" />
 
     <!--<node pkg="smach_viewer" type="smach_viewer.py" name="smach_viewer" output="screen"/>-->
 </launch>

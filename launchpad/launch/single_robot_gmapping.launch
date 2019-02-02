@@ -16,7 +16,7 @@
 
     <node pkg="multi_robot_path_planner" type="launch_nav.py" name="navigation" output="screen" />
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" >
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ssr_launchpad)/single_robot.rviz" >
         <remap from="/move_base_simple/goal" to="/dumper/move_base_simple/goal" />
     </node>
 </launch>
