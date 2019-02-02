@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>launchpad</name>
+  <name>ssr_launchpad</name>
   <version>0.0.0</version>
-  <description>The launchpad package</description>
+  <description>The ssr_launchpad package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

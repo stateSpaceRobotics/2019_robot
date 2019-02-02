@@ -1,6 +1,0 @@
-<launch>
-    <arg name="single" default="false" />
-    <!-- Visualization with RVIZ -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" if="$(arg single)" />
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/multi_robot.rviz" unless="$(arg single)" />
-</launch>
