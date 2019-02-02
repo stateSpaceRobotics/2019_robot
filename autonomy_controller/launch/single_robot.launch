@@ -1,0 +1,21 @@
+<launch>
+    <master auto="start" />
+    <rosparam file="$(find robot_config)/globals/single_bot_stage_map_server_fake_localization.yaml" command="load" />
+
+    <arg name="stage_sim" default="single_bot_empty" />
+
+    <include file="$(find ssr_stage)/launch/$(arg stage_sim).launch"/>
+
+    <arg name="map_file"    default="stage_empty.yaml" />
+
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find ssr_stage)/maps/$(arg map_file)" respawn="false" >
+        <param name="frame_id" value="/map" />
+        <remap from="map" to="/map" />
+    </node>
+
+    <node pkg="multi_robot_path_planner" type="launch_nav.py" name="navigation" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomy_controller)/single_robot.rviz" >
+        <remap from="/move_base_simple/goal" to="/dumper/move_base_simple/goal" />
+    </node>
+</launch>

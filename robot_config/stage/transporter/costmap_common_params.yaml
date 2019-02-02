@@ -5,10 +5,9 @@ update_frequency: 5.0
 
 footprint: [[0.17, 0.13], [-0.17, 0.13], [-0.17, -0.13], [0.17, -0.13]]
 
-plugins: [
-  {name: static_layer,type: "costmap_2d::StaticLayer"},
-  {name: inflation_layer, type: "costmap_2d::InflationLayer"}
-]
+plugins:
+  - {name: static_layer,type: "costmap_2d::StaticLayer"}
+  - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
 
 inflation_layer:
   inflation_radius: .25
