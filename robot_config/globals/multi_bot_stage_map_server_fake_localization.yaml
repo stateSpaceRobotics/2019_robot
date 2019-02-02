@@ -1,0 +1,93 @@
+use_sim_time: true
+
+rviz:
+  enabled: true
+  package: "autonomy_controller"
+  settings_file: "multi_robot.rviz"
+
+environment:
+  package: "ssr_stage"
+  launch_file: "multi_bot_empty.launch"
+  args: {}
+
+mapping:
+  - node_package: "map_server"
+    map_package: "ssr_stage"
+    map_path: "maps/stage_no_holes.yaml"
+    map_frame: "/map"
+    map_topic: "/map1"
+    node_name: "map_server1"
+
+  - node_package: "map_server"
+    map_package: "ssr_stage"
+    map_path: "maps/stage_obstacles.yaml"
+    map_frame: "/map"
+    map_topic: "/map2"
+    node_name: "map_server2"
+
+robots:
+  dumper:
+    namespace: "dumper"
+    tf_prefix: "robot_0"
+    scan_topic: "base_scan"
+    map_frame: "/map"
+    map_topic: "/map2"
+    odom_frame: "odom"
+    base_frame: "base_link"
+
+    move_base:
+      config_package: "robot_config"
+      config_path: "stage/dumper"
+
+    localization:
+      package: "fake_localization"
+      footprint_frame: "base_footprint"
+
+  #  localization:
+  #    package: "amcl"
+  #    footprint_frame: "base_link"
+  #    initial_pose: {x: 1.3, y: 1.0, z: 0.0}
+
+  digger:
+    namespace: "digger"
+    tf_prefix: "robot_1"
+    scan_topic: "/dumper/base_scan"
+    map_frame: "/map"
+    map_topic: "/map2"
+    odom_frame: "odom"
+    base_frame: "base_link"
+
+    move_base:
+      config_package: "robot_config"
+      config_path: "stage/digger"
+
+    localization:
+      package: "fake_localization"
+      footprint_frame: "base_footprint"
+
+  #  localization:
+  #    package: "amcl"
+  #    footprint_frame: "base_link"
+  #    initial_pose: {x: 1.15, y: 1.3, z: 0.0}
+
+  transporter:
+    namespace: "transporter"
+    tf_prefix: "robot_2"
+    scan_topic: "/dumper/base_scan"
+    map_frame: "/map"
+    map_topic: "/map1"
+    odom_frame: "odom"
+    base_frame: "base_link"
+
+    move_base:
+      config_package: "robot_config"
+      config_path: "stage/transporter"
+
+    localization:
+      package: "fake_localization"
+      footprint_frame: "base_footprint"
+
+  #  localization:
+  #    package: "amcl"
+  #    footprint_frame: "base_link"
+  #    initial_pose: {x: 1.0, y: 1.0, z: 0.0}

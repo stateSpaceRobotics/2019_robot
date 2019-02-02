@@ -1,0 +1,37 @@
+use_sim_time: true
+
+rviz:
+  enabled: true
+  package: "autonomy_controller"
+  settings_file: "single_robot.rviz"
+
+environment:
+  package: "ssr_stage"
+  launch_file: "single_bot_obstacles.launch"
+  args: {}
+
+mapping:
+  - node_package: "gmapping"
+    map_frame: "/map"
+    odom_frame: "/odom"
+    map_topic: "/map"
+    scan_topic: "/dumper/base_scan"
+    node_name: "gmapping"
+
+robots:
+  dumper:
+    namespace: "dumper"
+    tf_prefix: ""
+    scan_topic: "base_scan"
+    map_frame: "/map"
+    map_topic: "/map"
+    odom_frame: "odom"
+    base_frame: "base_link"
+
+    move_base:
+      config_package: "robot_config"
+      config_path: "stage/dumper"
+
+    localization:
+      package: "fake_localization"
+      footprint_frame: "base_footprint"

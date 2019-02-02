@@ -1,7 +1,0 @@
-
-
-<launch>
-	<master auto="start" />	
-	<rosparam file="$(find robot_config)/params.yaml" command="load" />
-	<node pkg="multi_robot_path_planner" type="launch_nav.py" name="navigation" output="screen" />
-</launch>
