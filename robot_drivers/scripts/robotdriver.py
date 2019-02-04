@@ -2,9 +2,6 @@
 import socket
 import rospy
 import math
-from sensor_msgs.msg import Joy
-from time import sleep
-from random import gauss
 from geometry_msgs.msg import Twist
 
 #Wrapper class for the UDP Socket
@@ -28,49 +25,84 @@ def calculateVelocity(radius, time):
     return (2.0 * math.pi * radius) / time
 
 
+#Build the message of motor commands to send over UDP
 def UDPSendMsg(twist_msg):
-    #Build the message to send over UDP
-
     x = twist_msg.linear.x
     z = twist_msg.angular.z
 
-    if z != 0.0:
-        r = abs(x / z)
-        t = abs((2.0 * math.pi) / z)
+    #If there's no angular component (z == 0) the motors just receive the linear component
+    Vright = x
+    Vleft = x
 
-        l = 0.115
+    #If there is an angular component we have to calculate the velocity for the left and right side motors to achieve the desired arc
+    if z != 0:
+        r = abs(x/z)
+        zabs = abs(z)
+        signx = sign(x)
+        signz = sign(z)
+        wheelOffset = 0.115
+        wheelRadius = 0.06
 
-        rleft = r + sign(z) * sign(x) * -1.0 * l
-        rright = r + sign(z) * sign(x) * l
+        #Calculate the radii for the arcs followed by the right side and the left side
+        rright = r + signx * signz * wheelOffset
+        rleft = r + signx * signz * -1.0 * wheelOffset        
 
-        vleft = sign(x) * calculateVelocity(rleft, t)
-        vright = sign(x) * calculateVelocity(rright, t)
-
-        debug_message = "\nvl: " + str(vleft)
-        debug_message += "\nvr: " + str(vright)
-        debug_message += "\nr: " + str(r)
-        debug_message += "\nt: " + str(t)
-        debug_message += "\nrl: " + str(rleft)
-        debug_message += "\nrr: " + str(rright)
-        debug_message += "\nsign(x): " + str(sign(x))
-        debug_message += "\nsign(z): " + str(sign(z)) + "\n"
-
-        rospy.loginfo(debug_message)
-
-    else:
-        vleft = x
-        vright = x
-
-    vleft = vleft / .06
-    vright = -1.0 * vright / .06
-
-
-    message = str(FRONT_LEFT_DRIVE) + "," + str(vleft) + "\n"
-    message += str(BACK_LEFT_DRIVE) + "," + str(vleft) + "\n"
-    message += str(FRONT_RIGHT_DRIVE) + "," + str(vright) + "\n"
-    message += str(BACK_RIGHT_DRIVE) + "," + str(vright) + "\n"
-    # rospy.loginfo(message)
+        #Calculate the linear velocity necessary to achieve the corresponding arcs
+        Vright = signx * zabs * rright
+        Vleft = signx * zabs * rleft
+ 
+    #Convert the calculated linear velocities into angular velocities because that is what the embedded side wants
+    Vright = -1.0 * Vright / wheelRadius    #Note that the right side is multiplied by -1. This is because direction is flipped due to the motor's physical orientation
+    Vleft = Vleft / wheelRadius
+    
+    #Construct and send the message to the embedded side via UDP
+    message = str(FRONT_LEFT_DRIVE) + "," + str(Vleft) + "\n"
+    message += str(BACK_LEFT_DRIVE) + "," + str(Vleft) + "\n"
+    message += str(FRONT_RIGHT_DRIVE) + "," + str(Vright) + "\n"
+    message += str(BACK_RIGHT_DRIVE) + "," + str(Vright) + "\n"
+    rospy.loginfo(message)
     set_point.sendMessage(message)
+
+# def UDPSendMsg(twist_msg):
+#     x = twist_msg.linear.x
+#     z = twist_msg.angular.z
+
+    # if z != 0.0:
+    #     r = abs(x / z)
+    #     t = abs((2.0 * math.pi) / z)
+
+    #     l = 0.115
+
+    #     rleft = r + sign(z) * sign(x) * -1.0 * l
+    #     rright = r + sign(z) * sign(x) * l
+
+    #     vleft = sign(x) * calculateVelocity(rleft, t)
+    #     vright = sign(x) * calculateVelocity(rright, t)
+
+    #     debug_message = "\nvl: " + str(vleft)
+    #     debug_message += "\nvr: " + str(vright)
+    #     debug_message += "\nr: " + str(r)
+    #     debug_message += "\nt: " + str(t)
+    #     debug_message += "\nrl: " + str(rleft)
+    #     debug_message += "\nrr: " + str(rright)
+    #     debug_message += "\nsign(x): " + str(sign(x))
+    #     debug_message += "\nsign(z): " + str(sign(z)) + "\n"
+
+    #     rospy.loginfo(debug_message)
+
+    # else:
+    #     vleft = x
+    #     vright = x
+
+    # vleft = vleft / .06
+    # vright = -1.0 * vright / .06
+
+    # message = str(FRONT_LEFT_DRIVE) + "," + str(vleft) + "\n"
+    # message += str(BACK_LEFT_DRIVE) + "," + str(vleft) + "\n"
+    # message += str(FRONT_RIGHT_DRIVE) + "," + str(vright) + "\n"
+    # message += str(BACK_RIGHT_DRIVE) + "," + str(vright) + "\n"
+    # # rospy.loginfo(message)
+    # set_point.sendMessage(message)
 
 # def UDPSendMsg(twist_msg):
 #     #Build the message to send over UDP
@@ -120,15 +152,9 @@ FRONT_RIGHT_DRIVE = 1
 BACK_RIGHT_DRIVE = 2
 BACK_LEFT_DRIVE = 3
 
-#Values for drive motor value calculation
-drive_motor_midpoint = 0
-drive_motor_increment_value = 2 * math.pi
-drive_motor_max_fraction = 1.0
-
 set_point = UDP_Handler("192.168.0.32", 3233)
 
 def main():
-
     rospy.init_node('listener', anonymous = True)
     rospy.Subscriber("/dumper/cmd_vel", Twist, UDPSendMsg)
 
