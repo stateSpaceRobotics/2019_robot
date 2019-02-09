@@ -14,7 +14,7 @@ include "dumper.inc"
 include "digger.inc"
 
 # Load collector trough
-collector_trough( pose [3.211 1.345 0 0] color "brown")
+collector_trough( pose [3.451 1.345 0 0] color "brown")
 
 # Load obstacles here
 # Example:

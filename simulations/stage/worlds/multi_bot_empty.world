@@ -14,7 +14,7 @@ include "dumper.inc"
 include "digger.inc"
 
 # Load collector trough
-collector_trough( pose [3.211 1.345 0 0] color "brown")
+collector_trough( pose [3.451 1.345 0 0] color "brown")
 
 # Instantiate a team of robots
 dumper( pose [1.16 0.5 0 0] name "dumper" color "green")
