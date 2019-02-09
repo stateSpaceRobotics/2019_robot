@@ -1,7 +1,7 @@
 
 define map model
 (
-  color "gray30"
+  color "black"
   boundary 0
   gui_nose 0
   gui_grid 0
@@ -24,7 +24,7 @@ map
 # Open a window centered on the map
 window
 (
-  size [ 400.000 820.000 ]
+  size [ 371.000 607.000 ]
   center [1.845 2.878]
   scale 100.0
 )
