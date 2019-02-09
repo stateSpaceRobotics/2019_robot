@@ -19,6 +19,6 @@ define obstacle_lg model
 
 define collector_trough model
 (
-  size [0.48 1.65 0.457]
+  size [0.48 1.65 0.7]
   gui_nose 0
 )
