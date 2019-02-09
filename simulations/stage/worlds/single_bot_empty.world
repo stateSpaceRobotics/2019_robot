@@ -13,6 +13,9 @@ include "transporter.inc"
 include "dumper.inc"
 include "digger.inc"
 
+# Load collector trough
+collector_trough( pose [3.211 1.345 0 0] color "brown")
+
 # Instantiate a dumper robot
 dumper( pose [0.945 0.75 0 0] name "dumper" color "red")
 

@@ -13,6 +13,11 @@ include "transporter.inc"
 include "dumper.inc"
 include "digger.inc"
 
+# Load collector trough
+collector_trough( pose [3.211 1.345 0 0] color "brown")
+
 # Load obstacles here
 # Example:
-#obstacle( pose [1.89 6.5 0 0] color "black")
+#obstacle( pose [1.89 4.5 0 0] color "black")
+
+
