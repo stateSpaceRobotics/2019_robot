@@ -16,8 +16,8 @@ define map model
 map
 (
   name "mining_field"
-  size [3.78 7.38 0.5]
-  pose [1.89 3.69 0 0]
+  size [3.691 5.756 0.5]
+  pose [1.845 2.878 0 0]
   bitmap "mining_field.png"
 )
 
@@ -25,6 +25,6 @@ map
 window
 (
   size [ 400.000 820.000 ]
-  center [1.89 3.69]
+  center [1.845 2.878]
   scale 100.0
 )
