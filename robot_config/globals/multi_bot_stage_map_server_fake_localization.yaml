@@ -53,7 +53,7 @@ robots:
     tf_prefix: "robot_1"
     scan_topic: "/dumper/base_scan"
     map_frame: "/map"
-    map_topic: "/map2"
+    map_topic: "/map1"
     odom_frame: "odom"
     base_frame: "base_link"
 
@@ -75,7 +75,7 @@ robots:
     tf_prefix: "robot_2"
     scan_topic: "/dumper/base_scan"
     map_frame: "/map"
-    map_topic: "/map1"
+    map_topic: "/map2"
     odom_frame: "odom"
     base_frame: "base_link"
 
