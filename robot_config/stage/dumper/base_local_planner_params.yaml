@@ -12,7 +12,7 @@ TrajectoryPlannerROS:
   holonomic_robot: false
 
 GlobalPlanner:
-  visualize_potential: true
+  # visualize_potential: true
   cost_factor: 0.55
   neutral_cost: 66
   lethal_cost: 253
@@ -52,3 +52,5 @@ DWAPlannerROS:
   oscilation_reset_dist: 0.05
 
   prune_plan: true
+
+  # publish_cost_grid: true

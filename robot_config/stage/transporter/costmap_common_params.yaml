@@ -10,5 +10,7 @@ plugins:
   - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
 
 inflation_layer:
-  inflation_radius: .25
+  # Set inflation_radius to the robot radius + 0.05
+  # Robot radius is the magnitude of the first footprint coordinate [#, #]
+  inflation_radius: .26
   cost_scaling_factor: 2.5
