@@ -1,0 +1,20 @@
+use_sim_time: false
+
+robots:
+  dumper:
+    namespace: "dumper"
+    tf_prefix: ""
+    scan_topic: "/device01"
+    map_frame: "map"
+    map_topic: "/map"
+    odom_frame: "odom"
+    base_frame: "base_link"
+    vive_frame: "device01"
+
+    move_base:
+      config_package: "robot_config"
+      config_path: "stage/dumper"
+
+    localization:
+      package: "robot_localization"
+      footprint_frame: "base_footprint"
