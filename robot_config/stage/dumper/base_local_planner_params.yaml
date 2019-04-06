@@ -33,6 +33,6 @@ DWAPlannerROS:
   max_rot_vel: 2.4
   min_rot_vel: 0.0
   
-  yaw_goal_tolerance: 0.08
+  yaw_goal_tolerance: 0.175
   xy_goal_tolerance: 0.06
   latch_xy_goal_tolerance: false

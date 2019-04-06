@@ -27,4 +27,6 @@
 	<node pkg="tf2_ros" type="static_transform_publisher" name="static_tf_broadcaster" args="0.0635 -0.0254 -0.1905 0 0 0 1 base_link base_footprint" />
         <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf_broadcaster_lighthouse" args="3.63856 1.14935 0.81280 0.5 0.5 0.5 0.5 map lighthouse_01" />
     <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf_broadcaster_odom" args="0 0 0 0 0 0 1 map odom" />
+
+    <node pkg="autonomy_controller" type="andy_demo.py" name="state_machine" output="screen" />
 </launch>

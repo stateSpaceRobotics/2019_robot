@@ -12,5 +12,6 @@ plugins:
 inflation_layer:
   # Set inflation_radius to the robot radius + 0.05
   # Robot radius is the magnitude of the first footprint coordinate [#, #]
-  inflation_radius: .52
+  # Actually, this shouldn't take the robot radius into accout, just the buffer we want
+  inflation_radius: .05
   cost_scaling_factor: 2.5
