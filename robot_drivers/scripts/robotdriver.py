@@ -34,8 +34,8 @@ def UDPSendMsg(twist_msg):
     Vright = x
     Vleft = x
 
-    wheelOffset = 0.115
-    wheelRadius = 0.06
+    wheelOffset = 0.13335
+    wheelRadius = 0.0762
 
     #If there is an angular component we have to calculate the velocity for the left and right side motors to achieve the desired arc
     if z != 0:

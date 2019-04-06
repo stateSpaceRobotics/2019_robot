@@ -1,35 +1,38 @@
 TrajectoryPlannerROS:
-  max_vel_x: 0.5
-  min_vel_x: 0.1
-  max_vel_theta: 1.5
-  min_in_place_vel_theta: 0.2
-  escape_vel: -0.3
+  max_vel_x: 0.18
+  min_vel_x: 0.0
+  max_vel_theta: 2.4
+  min_in_place_vel_theta: -2.4
+  escape_vel: -0.18
 
-  acc_lim_theta: 0.2
-  acc_lim_x: 0.2
-  acc_lim_y: 0.2
+  acc_lim_theta: 0.8
+  acc_lim_x: 0.6
+  acc_lim_y: 0.0
+
+  publish_cost_grid_pc: true
 
   holonomic_robot: false
   meter_scoring: true
 
 GlobalPlanner:
-  # visualize_potential: true
   cost_factor: 0.55
   neutral_cost: 66
   lethal_cost: 253
 
 DWAPlannerROS:
-  acc_lim_x: 0.2
+  acc_lim_x: 0.6
   acc_lim_y: 0.0
-  acc_lim_th: 0.2
+  acc_lim_th: 0.8
 
-  max_trans_vel: 0.45
+  max_trans_vel: 0.18
   min_trans_vel: 0.0
-  max_vel_x: 0.45
-  min_vel_x: -0.45
+  max_vel_x: 0.18
+  min_vel_x: -0.18
   max_vel_y: 0.0
   min_vel_y: 0.0
-  max_rot_vel: 0.6
+  max_rot_vel: 2.4
   min_rot_vel: 0.0
-
-  # publish_cost_grid: true
+  
+  yaw_goal_tolerance: 0.08
+  xy_goal_tolerance: 0.06
+  latch_xy_goal_tolerance: false

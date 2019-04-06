@@ -2,9 +2,9 @@
     <master auto="start" />
     <rosparam file="$(find robot_config)/globals/andy_demo.yaml" command="load" />
 
-    <arg name="stage_sim" default="single_bot_obstacles" />
+    <arg name="stage_sim" default="single_bot_empty" />
 
-    <!--<include file="$(find ssr_stage)/launch/$(arg stage_sim).launch"/>-->
+    <include file="$(find ssr_stage)/launch/$(arg stage_sim).launch"/>
 
     <arg name="map_file"    default="stage_empty.yaml" />
 
